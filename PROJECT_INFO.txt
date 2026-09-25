@@ -54,7 +54,7 @@ There are no .env files or secret configurations required.
 AUTHOR
 ======
 Developed by  : Jaydip Modasiya
-GitHub        : https://github.com/jaydip-modasiya
+GitHub        : https://github.com/jaydipmodasiya
 Built         : April 2026
 
 PURPOSE OF THIS FILE

@@ -62,3 +62,8 @@ node_modules/
 dist/
 build/
 .npm/
+
+
+
+# Ignore PROJECT_INFO.txt
+PROJECT_INFO.txt
