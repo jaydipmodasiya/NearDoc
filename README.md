@@ -190,7 +190,7 @@ All core features are implemented and functional. The app is a complete, working
 
 **Made by Jaydip Modasiya**
 
-- GitHub: [s`github.com/jaydipmodasiya](https://github.com/jaydipmodasiya)
+- GitHub: [github.com/jaydipmodasiya](https://github.com/jaydipmodasiya)
 - Built: April 2026
 
 ---
