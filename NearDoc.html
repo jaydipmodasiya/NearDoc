@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NearDoc – Campus Printing</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1a6ef5;--blue-light:#e8f0fe;--blue-mid:#4a90f5;--ink:#0d0d0d;--ink-60:#555;--ink-30:#aaa;--ink-10:#f0f0f0;--surface:#fff;--surface-2:#f7f8fc;--surface-3:#eef1f8;--green:#0a8a5c;--green-bg:#e6f6f0;--amber:#c47800;--amber-bg:#fff4e0;--red:#d43a3a;--red-bg:#fdeaea;--radius:14px;--radius-sm:8px;--shadow:0 2px 16px rgba(0,0,0,0.08);--shadow-lg:0 8px 40px rgba(0,0,0,0.12);--t:0.22s cubic-bezier(0.4,0,0.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--ink);min-height:100vh;overflow-x:hidden}
+/* NAV */
+.topnav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(255,255,255,0.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,0,0,0.07);height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(16px,4vw,48px);gap:12px}
+.nav-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:400;color:var(--ink);cursor:pointer;letter-spacing:-0.5px;flex-shrink:0}
+.nav-logo span{color:var(--blue)}
+.nav-steps{display:flex;align-items:center;gap:4px}
+.nav-step{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-30);font-weight:500;padding:5px 10px;border-radius:99px;transition:var(--t);cursor:default;white-space:nowrap}
+.nav-step.done{color:var(--blue);cursor:pointer}.nav-step.done:hover{background:var(--blue-light)}
+.nav-step.active{color:var(--ink);background:var(--surface-3)}
+.nav-step-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.nav-sep{color:var(--ink-30);font-size:11px}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-orders-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:1.5px solid rgba(0,0,0,0.1);background:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t);position:relative}
+.nav-orders-btn:hover{background:var(--surface-3);border-color:var(--ink)}
+.nav-badge{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid #fff}
+@media(max-width:640px){.nav-steps{display:none}}
+/* SCREENS */
+.screens-outer{padding-top:62px;min-height:100vh}
+.screen{display:none;opacity:0;min-height:calc(100vh - 62px);animation:fadeUp .32s cubic-bezier(0.4,0,0.2,1) forwards}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* HERO */
+.page-hero{background:linear-gradient(135deg,#0d0d0d 0%,#111827 100%);padding:clamp(40px,7vw,88px) clamp(16px,4vw,48px) 0;overflow:hidden;position:relative}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,rgba(26,110,245,0.28) 0%,transparent 70%);pointer-events:none}
+.hero-label{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.75);font-size:12px;font-weight:500;padding:5px 12px;border-radius:99px;margin-bottom:18px}
+.hero-title{font-family:'Fraunces',serif;font-size:clamp(34px,5.5vw,68px);font-weight:300;color:#fff;line-height:1.08;letter-spacing:-1.5px;margin-bottom:14px}
+.hero-title em{font-style:italic;color:var(--blue-mid)}
+.hero-sub{font-size:clamp(14px,1.8vw,16px);color:rgba(255,255,255,0.5);max-width:460px;line-height:1.65;margin-bottom:32px;font-weight:300}
+.hero-stats{display:flex;gap:10px;margin-bottom:-1px;flex-wrap:wrap}
+.hero-stat{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-bottom:none;border-radius:12px 12px 0 0;padding:12px 18px}
+.hero-stat-num{font-size:20px;font-weight:600;color:#fff}.hero-stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.hero-mini{padding:clamp(24px,4vw,44px) clamp(16px,4vw,48px) 0}
+/* LAYOUT */
+.wrap{max-width:880px;margin:0 auto;padding:clamp(24px,4vw,44px) clamp(16px,4vw,48px)}
+.wrap-wide{max-width:1100px;margin:0 auto;padding:clamp(24px,4vw,44px) clamp(16px,4vw,48px)}
+.two-col{display:grid;gap:24px;grid-template-columns:1fr}
+@media(min-width:768px){.two-col{grid-template-columns:1fr 1fr}}
+/* CARDS */
+.card{background:var(--surface);border:1px solid rgba(0,0,0,0.07);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.card+.card{margin-top:14px}
+/* UPLOAD */
+.upload-zone{border:2px dashed rgba(26,110,245,0.3);border-radius:var(--radius);padding:clamp(36px,5vw,72px) 28px;text-align:center;cursor:pointer;transition:var(--t);background:var(--blue-light);position:relative;overflow:hidden}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--blue);background:#dce8fd;transform:scale(1.004)}
+.upload-icon-wrap{width:68px;height:68px;border-radius:50%;background:var(--surface);margin:0 auto 18px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(26,110,245,0.2)}
+.upload-icon-wrap svg{width:30px;height:30px}
+.upload-title{font-size:19px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.upload-sub{font-size:13px;color:var(--ink-60);line-height:1.5}
+.upload-formats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.fmt-chip{background:var(--surface);border:1px solid rgba(0,0,0,0.1);padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;color:var(--ink-60)}
+/* FILE PREVIEW */
+.file-preview{display:flex;align-items:center;gap:14px;background:var(--surface);border:1.5px solid rgba(26,110,245,0.25);border-radius:var(--radius);padding:14px 18px;box-shadow:0 2px 12px rgba(26,110,245,0.08)}
+.file-icon-wrap{width:46px;height:46px;flex-shrink:0;background:var(--blue-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.file-name{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.file-meta{font-size:12px;color:var(--ink-60)}
+.file-remove{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--ink-30);font-size:22px;padding:2px 6px;border-radius:6px;transition:var(--t);line-height:1;flex-shrink:0}
+.file-remove:hover{background:var(--red-bg);color:var(--red)}
+/* LABELS */
+.sec-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-30);margin-bottom:10px;display:block}
+/* CHIPS */
+.chip-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip{padding:8px 16px;border-radius:99px;border:1.5px solid rgba(0,0,0,0.1);background:var(--surface);font-size:13px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t)}
+.chip:hover{border-color:var(--blue);color:var(--blue)}.chip.active{border-color:var(--blue);background:var(--blue);color:#fff}
+/* STEPPER */
+.stepper-wrap{display:flex;align-items:center;border:1.5px solid rgba(0,0,0,0.1);border-radius:99px;overflow:hidden;width:fit-content}
+.stepper-btn{width:40px;height:40px;background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink-60);transition:var(--t);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stepper-btn:hover{background:var(--blue);color:#fff}
+.stepper-val{width:46px;text-align:center;font-size:15px;font-weight:600;color:var(--ink);border-left:1px solid rgba(0,0,0,0.08);border-right:1px solid rgba(0,0,0,0.08);height:40px;line-height:40px}
+/* PRICE BANNER */
+.price-banner{background:linear-gradient(135deg,var(--ink) 0%,#1a1a2e 100%);border-radius:var(--radius);padding:20px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.price-label{font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:4px}
+.price-amount{font-family:'Fraunces',serif;font-size:34px;font-weight:300;color:#fff;letter-spacing:-1px}
+.price-breakdown{font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px}
+/* SHOP CARDS */
+.shop-grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:600px){.shop-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}
+.shop-card{background:var(--surface);border:2px solid rgba(0,0,0,0.07);border-radius:var(--radius);padding:20px;cursor:pointer;transition:var(--t);position:relative;overflow:hidden}
+.shop-card:hover{border-color:rgba(26,110,245,0.4);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.shop-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.shop-card.selected::after{content:'✓';position:absolute;top:14px;right:14px;width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.shop-avatar{width:46px;height:46px;border-radius:12px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.shop-name{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.shop-meta{font-size:12px;color:var(--ink-60);display:flex;gap:8px;flex-wrap:wrap}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-green{background:var(--green-bg);color:var(--green)}.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-blue{background:var(--blue-light);color:var(--blue)}.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-ink{background:var(--ink-10);color:var(--ink-60)}
+/* MAP */
+.map-area{background:linear-gradient(135deg,#e8f0fe 0%,#d0e4ff 100%);border-radius:var(--radius);height:150px;display:flex;align-items:center;justify-content:center;margin-bottom:22px;position:relative;overflow:hidden;border:1px solid rgba(26,110,245,0.15)}
+/* PAYMENT */
+.pay-option{display:flex;align-items:center;gap:14px;border:2px solid rgba(0,0,0,0.07);border-radius:var(--radius);padding:14px 18px;cursor:pointer;transition:var(--t);margin-bottom:10px;background:var(--surface)}
+.pay-option:hover{border-color:rgba(26,110,245,0.3)}.pay-option.selected{border-color:var(--blue);background:var(--blue-light)}
+.pay-logo{width:42px;height:42px;border-radius:10px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pay-name{font-size:14px;font-weight:600;color:var(--ink)}.pay-sub{font-size:12px;color:var(--ink-60);margin-top:2px}
+.pay-radio{width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,0,0,0.15);flex-shrink:0;margin-left:auto;display:flex;align-items:center;justify-content:center;transition:var(--t)}
+.pay-option.selected .pay-radio{border-color:var(--blue);background:var(--blue)}
+.pay-radio-dot{width:8px;height:8px;border-radius:50%;background:#fff}
+/* SUMMARY */
+.sum-table{width:100%;border-collapse:collapse}
+.sum-table tr td{padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:14px;vertical-align:top}
+.sum-table tr:last-child td{border:none;font-size:15px;font-weight:600;padding-top:13px}
+.sum-table td:last-child{text-align:right;font-weight:500}
+.sum-table .muted{color:var(--ink-60);font-weight:400}
+.sum-table .discount{color:var(--green);font-weight:600}
+/* TRACKING */
+.track-header{border-radius:var(--radius);padding:26px;margin-bottom:22px;text-align:center;position:relative;overflow:hidden}
+.track-header.printing{background:linear-gradient(135deg,#1a6ef5,#0f50c4)}
+.track-header.ready{background:linear-gradient(135deg,#0a8a5c,#056040)}
+.track-header.collected{background:linear-gradient(135deg,var(--ink),#2a2a2a)}
+.track-icon-big{font-size:42px;margin-bottom:10px}
+.track-status{font-family:'Fraunces',serif;font-size:26px;color:#fff;font-weight:400;margin-bottom:5px}
+.track-sub-text{font-size:13px;color:rgba(255,255,255,0.6)}
+.track-steps{margin:20px 0}
+.track-step{display:flex;gap:14px;padding-bottom:22px;position:relative}
+.track-step:last-child{padding-bottom:0}
+.ts-line{position:absolute;left:15px;top:30px;bottom:0;width:2px;background:var(--ink-10)}
+.track-step:last-child .ts-line{display:none}
+.ts-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;z-index:1}
+.ts-dot.done{background:var(--green);color:#fff}.ts-dot.active{background:var(--blue);color:#fff;box-shadow:0 0 0 6px rgba(26,110,245,0.14)}.ts-dot.pending{background:var(--surface-3);color:var(--ink-30);border:2px solid var(--ink-10)}
+.ts-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.ts-sub{font-size:12px;color:var(--ink-60)}
+.track-step.is-pending .ts-title{color:var(--ink-30)}
+/* OTP */
+.otp-card{background:linear-gradient(135deg,var(--ink),#1a1a2e);border-radius:var(--radius);padding:26px;text-align:center;margin:20px 0}
+.otp-label-text{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.otp-code{font-family:'Fraunces',serif;font-size:52px;font-weight:300;letter-spacing:14px;color:#fff;margin:0 0 8px}
+.otp-hint{font-size:12px;color:rgba(255,255,255,0.35)}
+/* BUTTONS */
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 26px;background:var(--blue);color:#fff;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:var(--t)}
+.btn-primary:hover{background:#0f5cd1;transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,110,245,0.32)}
+.btn-primary:active{transform:scale(0.98)}.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 26px;background:none;color:var(--ink-60);border:1.5px solid rgba(0,0,0,0.12);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:var(--t)}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink);background:var(--surface-3)}
+.btn-danger{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;background:none;color:var(--red);border:1.5px solid rgba(212,58,58,0.25);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:var(--t)}
+.btn-danger:hover{background:var(--red-bg)}
+/* ORDERS SCREEN */
+.order-tabs{display:flex;gap:4px;margin-bottom:22px;background:var(--surface-3);border-radius:99px;padding:4px}
+.order-tab{flex:1;padding:8px 12px;border:none;background:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t);text-align:center;white-space:nowrap}
+.order-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 8px rgba(0,0,0,0.1)}
+.orders-list{display:flex;flex-direction:column;gap:12px}
+.order-card{background:var(--surface);border:1px solid rgba(0,0,0,0.07);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:var(--t);position:relative;overflow:hidden}
+.order-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg);border-color:rgba(26,110,245,0.2)}
+.order-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px}
+.order-card-icon{width:42px;height:42px;border-radius:10px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.order-card-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.order-card-sub{font-size:12px;color:var(--ink-60)}
+.order-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(0,0,0,0.05)}
+.meta-chip{font-size:12px;color:var(--ink-60);display:flex;align-items:center;gap:4px}
+.order-progress{margin-top:12px}
+.op-bar{height:4px;background:var(--ink-10);border-radius:99px;overflow:hidden;margin-bottom:5px}
+.op-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(0.4,0,0.2,1)}
+.op-label{font-size:11px;color:var(--ink-30)}
+.active-pulse{position:absolute;top:18px;right:18px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.active-pulse::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--blue);animation:pulse 1.5s ease-out infinite}
+@keyframes pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.2)}}
+/* STATS */
+.stats-row{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);margin-bottom:24px}
+@media(min-width:480px){.stats-row{grid-template-columns:repeat(4,1fr)}}
+.stat-card{background:var(--surface);border:1px solid rgba(0,0,0,0.07);border-radius:var(--radius-sm);padding:14px 16px;box-shadow:var(--shadow)}
+.stat-num{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:var(--ink);letter-spacing:-0.5px}
+.stat-lbl{font-size:11px;color:var(--ink-30);margin-top:3px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+/* SAMPLE FILES */
+.sample-grid{display:grid;gap:10px;grid-template-columns:1fr;margin-top:18px}
+@media(min-width:480px){.sample-grid{grid-template-columns:1fr 1fr}}
+.sample-file{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface);border:1px solid rgba(0,0,0,0.07);cursor:pointer;transition:var(--t)}
+.sample-file:hover{border-color:var(--blue);background:var(--blue-light)}
+/* RECENT */
+.recent-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;transition:var(--t)}
+.recent-row:last-child{border:none}.recent-row:hover{padding-left:4px}
+.recent-thumb{width:38px;height:38px;border-radius:10px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+/* DIVIDER */
+.divider{height:1px;background:rgba(0,0,0,0.06);margin:22px 0}
+/* BACK BTN */
+.back-btn{background:rgba(255,255,255,0.12);border:none;color:rgba(255,255,255,.7);padding:7px 15px;border-radius:99px;font-size:13px;cursor:pointer;margin-bottom:16px;font-family:'DM Sans',sans-serif;transition:var(--t)}
+.back-btn:hover{background:rgba(255,255,255,.2)}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:99px;font-size:14px;font-weight:500;z-index:9999;transition:transform .38s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.25)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+@media(min-width:520px){.modal-overlay{align-items:center}}
+.modal-box{background:var(--surface);width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:28px 24px;transform:translateY(100%);transition:transform .3s cubic-bezier(0.4,0,0.2,1);max-height:90vh;overflow-y:auto}
+@media(min-width:520px){.modal-box{border-radius:20px;transform:translateY(30px) scale(0.97)}}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1)}
+.modal-title{font-family:'Fraunces',serif;font-size:22px;font-weight:400;margin-bottom:4px}
+.modal-close{float:right;background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink-30);line-height:1;padding:0 4px}
+.modal-close:hover{color:var(--ink)}
+@media(max-width:640px){
+  .wrap,.wrap-wide{padding-left:16px;padding-right:16px}
+  .file-preview{align-items:flex-start;flex-wrap:wrap;padding:14px}
+  .file-remove{margin-left:0}
+  .price-banner{flex-direction:column;align-items:flex-start;gap:16px}
+  .price-amount{font-size:28px}
+  .order-card-title{max-width:160px}
+  .otp-code{font-size:40px;letter-spacing:10px}
+  .track-status{font-size:22px}
+  .otp-code{font-size:clamp(30px,11vw,44px);letter-spacing:clamp(4px,2.8vw,10px)}
+  .order-card-title{max-width:none}
+  .sum-table tr td{font-size:13px}
+  .sum-table td:last-child{max-width:150px;word-break:break-word}
+  .track-header,.otp-card,.card{padding:18px}
+}
+@media(max-width:520px){
+  .topnav{padding:0 12px}
+  .nav-orders-btn span:not(.nav-badge){display:none}
+  .nav-orders-btn{padding:7px 10px}
+  .chip-group{gap:6px}
+  .chip{padding:8px 13px;font-size:12px}
+  .stepper-wrap{width:100%;max-width:170px}
+  .stepper-val{flex:1}
+}
+/* MISC */
+textarea{resize:vertical;outline:none}
+input[type=file]{display:none}
+/* ── AUTH GUARD OVERLAY ── */
+#authGuard{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px}
+#authGuard .guard-logo{font-family:'Fraunces',serif;font-size:28px;color:var(--ink);letter-spacing:-0.5px}
+#authGuard .guard-logo span{color:var(--blue)}
+#authGuard p{font-size:15px;color:var(--ink-60);text-align:center;max-width:300px;line-height:1.6}
+#authGuard .guard-btn{padding:12px 32px;background:var(--blue);color:#fff;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
+/* ── NAV AVATAR ── */
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:var(--t);border:2px solid transparent}
+.nav-avatar:hover{border-color:var(--blue-light)}
+/* ── PROFILE MODAL ── */
+.profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s}
+.profile-overlay.open{opacity:1;pointer-events:all}
+.profile-modal{background:var(--surface);border-radius:20px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:translateY(20px) scale(0.97);transition:transform .28s cubic-bezier(0.4,0,0.2,1)}
+.profile-overlay.open .profile-modal{transform:translateY(0) scale(1)}
+.profile-header{padding:24px 24px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.profile-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink-30);line-height:1;padding:2px 6px}
+.profile-close:hover{color:var(--ink)}
+.profile-hero{padding:20px 24px;display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(0,0,0,0.07)}
+.profile-avatar-big{width:60px;height:60px;border-radius:50%;background:var(--blue);color:#fff;font-size:22px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.profile-name{font-size:18px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.profile-email{font-size:13px;color:var(--ink-60)}
+.profile-body{padding:16px 24px}
+.profile-section{margin-bottom:20px}
+.profile-section-title{font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--ink-30);margin-bottom:10px}
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.profile-row:last-child{border:none}
+.profile-row-label{font-size:13px;color:var(--ink-60)}
+.profile-row-value{font-size:13px;font-weight:500;color:var(--ink);text-align:right;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-edit-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.profile-edit-field label{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-30)}
+.profile-edit-field input{padding:10px 13px;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:var(--t)}
+.profile-edit-field input:focus{border-color:var(--blue)}
+.profile-tabs{display:flex;gap:4px;background:var(--surface-3);border-radius:99px;padding:4px;margin-bottom:18px}
+.profile-tab{flex:1;padding:8px 10px;border:none;background:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t);text-align:center}
+.profile-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,0.09)}
+.profile-panel{display:none}.profile-panel.active{display:block}
+.profile-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.profile-stat{background:var(--surface-2);border-radius:var(--radius-sm);padding:12px 14px}
+.profile-stat-num{font-family:'Fraunces',serif;font-size:22px;color:var(--ink);letter-spacing:-0.5px}
+.profile-stat-lbl{font-size:11px;color:var(--ink-30);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.btn-logout{width:100%;padding:12px;background:none;color:var(--red);border:1.5px solid rgba(212,58,58,0.2);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:var(--t);margin-top:8px}
+.btn-logout:hover{background:var(--red-bg)}
+.btn-save-profile{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:var(--t);margin-top:4px}
+.btn-save-profile:hover{background:#0f5cd1}
+
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
+</style>
+</head>
+<body>
+
+<!-- AUTH GUARD -->
+<div id="authGuard" style="display:none">
+  <div class="guard-logo"><span>Near</span>Doc</div>
+  <p>Sign in to upload documents and place print orders at campus shops near you.</p>
+  <button class="guard-btn" onclick="window.location.href='./NearDoc-auth.html'">Sign in / Create account</button>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="profile-overlay" id="profileOverlay" onclick="if(event.target===this)closeProfile()">
+  <div class="profile-modal" id="profileModal">
+    <div class="profile-header">
+      <div style="font-family:'Fraunces',serif;font-size:18px;font-weight:400">My profile</div>
+      <button class="profile-close" onclick="closeProfile()">×</button>
+    </div>
+    <div class="profile-hero">
+      <div class="profile-avatar-big" id="pAvatar">R</div>
+      <div>
+        <div class="profile-name" id="pName">—</div>
+        <div class="profile-email" id="pEmail">—</div>
+        <div style="margin-top:6px"><span class="badge badge-blue" style="font-size:10px">🎓 Student</span></div>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="profile-tabs">
+        <button class="profile-tab active" onclick="switchPTab('overview',this)">Overview</button>
+        <button class="profile-tab" onclick="switchPTab('edit',this)">Edit profile</button>
+        <button class="profile-tab" onclick="switchPTab('security',this)">Security</button>
+      </div>
+      <!-- Overview -->
+      <div class="profile-panel active" id="ptab-overview">
+        <div class="profile-stat-grid">
+          <div class="profile-stat"><div class="profile-stat-num" id="pStatOrders">0</div><div class="profile-stat-lbl">Total orders</div></div>
+          <div class="profile-stat"><div class="profile-stat-num" id="pStatSpend">₹0</div><div class="profile-stat-lbl">Total spent</div></div>
+          <div class="profile-stat"><div class="profile-stat-num" id="pStatActive">0</div><div class="profile-stat-lbl" style="color:var(--blue)">Active</div></div>
+          <div class="profile-stat"><div class="profile-stat-num" id="pStatDone">0</div><div class="profile-stat-lbl" style="color:var(--green)">Completed</div></div>
+        </div>
+        <div class="profile-section">
+          <div class="profile-section-title">Account info</div>
+          <div class="profile-row"><span class="profile-row-label">Full name</span><span class="profile-row-value" id="pInfoName">—</span></div>
+          <div class="profile-row"><span class="profile-row-label">Email</span><span class="profile-row-value" id="pInfoEmail">—</span></div>
+          <div class="profile-row"><span class="profile-row-label">Phone</span><span class="profile-row-value" id="pInfoPhone">—</span></div>
+          <div class="profile-row"><span class="profile-row-label">College</span><span class="profile-row-value" id="pInfoCollege">—</span></div>
+          <div class="profile-row"><span class="profile-row-label">Member since</span><span class="profile-row-value" id="pInfoJoined">—</span></div>
+        </div>
+        <button class="btn-logout" onclick="logoutUser()">Sign out</button>
+      </div>
+      <!-- Edit -->
+      <div class="profile-panel" id="ptab-edit">
+        <div class="profile-edit-field"><label>First name</label><input type="text" id="peFirstName" placeholder="First name"></div>
+        <div class="profile-edit-field"><label>Last name</label><input type="text" id="peLastName" placeholder="Last name"></div>
+        <div class="profile-edit-field"><label>Phone</label><input type="tel" id="pePhone" placeholder="+91 98765 43210"></div>
+        <div class="profile-edit-field"><label>College / University</label><input type="text" id="peCollege" placeholder="College name"></div>
+        <button class="btn-save-profile" onclick="saveProfile()">Save changes</button>
+      </div>
+      <!-- Security -->
+      <div class="profile-panel" id="ptab-security">
+        <div class="profile-section">
+          <div class="profile-section-title">Change password</div>
+          <div class="profile-edit-field"><label>Current password</label><input type="password" id="peCurPwd" placeholder="Current password"></div>
+          <div class="profile-edit-field"><label>New password</label><input type="password" id="peNewPwd" placeholder="New password (min 6 chars)"></div>
+          <div class="profile-edit-field"><label>Confirm new password</label><input type="password" id="peCfmPwd" placeholder="Confirm new password"></div>
+          <button class="btn-save-profile" onclick="changePassword()">Update password</button>
+        </div>
+        <div class="profile-section" style="margin-top:20px">
+          <div class="profile-section-title">Danger zone</div>
+          <div class="profile-edit-field"><label>Confirm password to delete account</label><input type="password" id="peDeletePwd" placeholder="Enter your password"></div>
+          <button class="btn-logout" onclick="deleteUserAccount()" style="margin-bottom:10px">Delete my account</button>
+          <button class="btn-logout" onclick="logoutUser()">Sign out of this device</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo" onclick="goTo('s1')"><span>Near</span>Doc</div>
+  <div class="nav-steps">
+    <div class="nav-step active" id="ns0"><div class="nav-step-dot"></div>Upload</div>
+    <div class="nav-sep">›</div>
+    <div class="nav-step" id="ns1"><div class="nav-step-dot"></div>Options</div>
+    <div class="nav-sep">›</div>
+    <div class="nav-step" id="ns2"><div class="nav-step-dot"></div>Shop</div>
+    <div class="nav-sep">›</div>
+    <div class="nav-step" id="ns3"><div class="nav-step-dot"></div>Pay</div>
+    <div class="nav-sep">›</div>
+    <div class="nav-step" id="ns4"><div class="nav-step-dot"></div>Track</div>
+  </div>
+  <div class="nav-right">
+    <button class="nav-orders-btn" onclick="goTo('orders')">
+      📦 <span>My Orders</span>
+      <span class="nav-badge" id="activeBadge"></span>
+    </button>
+    <div class="nav-avatar" id="navAvatar" onclick="openProfile()" title="My profile">R</div>
+  </div>
+</nav>
+
+<div class="screens-outer">
+
+<!-- ══════ S1: UPLOAD ══════ -->
+<div class="screen active" id="s1">
+  <div class="page-hero">
+    <div class="wrap">
+      <div class="hero-label">✦ Campus Printing, Reinvented</div>
+      <h1 class="hero-title">Skip the queue.<br><em>Print smarter.</em></h1>
+      <p class="hero-sub">Upload your document, pick a nearby shop, and walk in to a ready printout — zero waiting.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-num">2 min</div><div class="hero-stat-label">avg. wait time</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">12+</div><div class="hero-stat-label">campus shops</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">₹1</div><div class="hero-stat-label">per page from</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" multiple>
+    <div class="upload-zone" id="uploadZone">
+      <div class="upload-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1a6ef5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9,15 12,12 15,15"/>
+        </svg>
+      </div>
+      <div class="upload-title">Drop your document here</div>
+      <div class="upload-sub">or click to browse from your device</div>
+      <div class="upload-formats">
+        <div class="fmt-chip">PDF</div><div class="fmt-chip">DOC</div><div class="fmt-chip">DOCX</div><div class="fmt-chip">PNG</div><div class="fmt-chip">JPG</div>
+      </div>
+    </div>
+
+    <div id="filePreviewWrap" style="display:none;margin-top:14px">
+      <div class="file-preview" style="margin-bottom:10px">
+        <div class="file-icon-wrap" id="prevIcon">📄</div>
+        <div style="flex:1;min-width:0">
+          <div class="file-name" id="prevName">Selected documents</div>
+          <div class="file-meta" id="prevMeta">—</div>
+        </div>
+        <button class="file-remove" onclick="removeFile()">×</button>
+      </div>
+      <div id="fileList" style="display:grid;gap:10px"></div>
+      <div style="margin-top:14px">
+        <button class="btn-primary" onclick="goTo('s2')">Continue to print options <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+      </div>
+    </div>
+
+    <div id="sampleSection">
+      <div class="divider"></div>
+      <div class="sec-label">Try a sample document</div>
+      <div class="sample-grid">
+        <div class="sample-file" onclick="useSample('Assignment_Final.pdf','2.4 MB','📄',12)"><span style="font-size:20px">📄</span><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Assignment_Final.pdf</div><div style="font-size:11px;color:var(--ink-60)">2.4 MB · 12 pages</div></div></div>
+        <div class="sample-file" onclick="useSample('Resume_2024.docx','0.8 MB','📝',2)"><span style="font-size:20px">📝</span><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Resume_2024.docx</div><div style="font-size:11px;color:var(--ink-60)">0.8 MB · 2 pages</div></div></div>
+        <div class="sample-file" onclick="useSample('Lab_Report.pdf','4.1 MB','🔬',8)"><span style="font-size:20px">🔬</span><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Lab_Report.pdf</div><div style="font-size:11px;color:var(--ink-60)">4.1 MB · 8 pages</div></div></div>
+        <div class="sample-file" onclick="useSample('Thesis_Chapter2.pdf','1.2 MB','📚',6)"><span style="font-size:20px">📚</span><div><div style="font-size:13px;font-weight:600;color:var(--ink)">Thesis_Chapter2.pdf</div><div style="font-size:11px;color:var(--ink-60)">1.2 MB · 6 pages</div></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="sec-label" style="margin-bottom:0">Recent orders</div>
+      <button onclick="goTo('orders')" style="background:none;border:none;font-size:13px;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">See all →</button>
+    </div>
+    <div id="homeRecentOrders"></div>
+  </div>
+</div>
+
+<!-- ══════ S2: OPTIONS ══════ -->
+<div class="screen" id="s2">
+  <div class="page-hero hero-mini">
+    <div class="wrap">
+      <button class="back-btn" onclick="goTo('s1')">← Back</button>
+      <h1 class="hero-title" style="font-size:clamp(26px,4vw,46px);margin-bottom:8px">Print <em>options</em></h1>
+      <p class="hero-sub" style="margin-bottom:0;font-size:14px">Customize how your document gets printed</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="file-preview" style="margin-bottom:26px">
+      <div class="file-icon-wrap" id="s2Icon">📄</div>
+      <div style="flex:1;min-width:0"><div class="file-name" id="s2Name">—</div><div class="file-meta" id="s2Meta">—</div></div>
+      <span class="badge badge-blue">Ready</span>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="sec-label">Number of copies</div>
+        <div id="copiesEditor" style="display:grid;gap:10px;margin-bottom:22px"></div>
+        <div class="sec-label">Color</div>
+        <div class="chip-group">
+          <div class="chip active" data-group="color" data-val="bw" onclick="setChip('color',this)">B&W</div>
+          <div class="chip" data-group="color" data-val="clr" onclick="setChip('color',this)">Color</div>
+        </div>
+        <div class="sec-label">Paper size</div>
+        <div class="chip-group">
+          <div class="chip active" data-group="size" data-val="a4" onclick="setChip('size',this)">A4</div>
+          <div class="chip" data-group="size" data-val="a3" onclick="setChip('size',this)">A3</div>
+          <div class="chip" data-group="size" data-val="letter" onclick="setChip('size',this)">Letter</div>
+        </div>
+        <div class="sec-label">Sides</div>
+        <div class="chip-group">
+          <div class="chip active" data-group="sides" data-val="single" onclick="setChip('sides',this)">Single-sided</div>
+          <div class="chip" data-group="sides" data-val="double" onclick="setChip('sides',this)">Double-sided</div>
+        </div>
+        <div class="sec-label">Binding</div>
+        <div class="chip-group">
+          <div class="chip active" data-group="bind" data-val="none" onclick="setChip('bind',this)">None</div>
+          <div class="chip" data-group="bind" data-val="staple" onclick="setChip('bind',this)">Staple</div>
+          <div class="chip" data-group="bind" data-val="spiral" onclick="setChip('bind',this)">Spiral</div>
+        </div>
+      </div>
+      <div>
+        <div class="price-banner">
+          <div>
+            <div class="price-label">Estimated price</div>
+            <div class="price-amount">₹<span id="priceAmt">1</span></div>
+            <div class="price-breakdown" id="priceBreak">1 page · 1 copy · B&W · A4 · Single-sided</div>
+          </div>
+          <div style="font-size:44px;opacity:.12">🖨️</div>
+        </div>
+        <div style="font-size:12px;color:var(--ink-60);line-height:1.7;margin:-12px 0 18px">
+          Note: Estimated price only. Different price per shop may apply based on shop rates and print settings. Final payable amount is shown after shop selection. T&amp;C apply.
+        </div>
+        <div class="card">
+          <div class="sec-label" style="margin-bottom:10px">Special instructions</div>
+          <textarea id="specialInstr" placeholder="e.g. Print pages 1–5 only, landscape, staple top-left…" style="width:100%;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);min-height:90px;background:var(--surface-2)" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'"></textarea>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:24px">
+      <button class="btn-primary" onclick="goTo('s3')">Choose a nearby shop <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ S3: SHOPS ══════ -->
+<div class="screen" id="s3">
+  <div class="page-hero hero-mini">
+    <div class="wrap">
+      <button class="back-btn" onclick="goTo('s2')">← Back</button>
+      <h1 class="hero-title" style="font-size:clamp(26px,4vw,46px);margin-bottom:8px">Nearby <em>shops</em></h1>
+      <p class="hero-sub" id="shopsHeroSub" style="margin-bottom:0;font-size:14px">Available print shops near your campus</p>
+    </div>
+  </div>
+  <div class="wrap-wide">
+    <div class="map-area">
+      <div style="position:absolute;inset:0">
+        <div style="position:absolute;left:22%;top:42%;width:12px;height:12px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 7px rgba(26,110,245,0.2)"></div>
+        <div style="position:absolute;left:54%;top:58%;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px rgba(10,138,92,0.2)"></div>
+        <div style="position:absolute;left:74%;top:36%;width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 6px rgba(196,120,0,0.2)"></div>
+        <div style="position:absolute;left:43%;top:50%;width:14px;height:14px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.2)"></div>
+      </div>
+      <span id="shopMapSummary" style="font-size:13px;color:var(--blue);font-weight:500;z-index:1;background:rgba(255,255,255,0.88);padding:6px 14px;border-radius:99px">📍 Available shops nearby · You are here</span>
+    </div>
+    <div class="shop-grid" id="shopGrid"></div>
+    <div id="noShopMsg" class="card" style="display:none;margin-top:14px;text-align:center">
+      <div style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px">No verified shops available right now</div>
+      <div style="font-size:13px;color:var(--ink-60)">Ask an admin to approve a shop, or check back later.</div>
+    </div>
+    <div style="margin-top:24px">
+      <button class="btn-primary" id="shopBtn" onclick="goTo('s4')" disabled>Proceed to payment <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ S4: PAYMENT ══════ -->
+<div class="screen" id="s4">
+  <div class="page-hero hero-mini">
+    <div class="wrap">
+      <button class="back-btn" onclick="goTo('s3')">← Back</button>
+      <h1 class="hero-title" style="font-size:clamp(26px,4vw,46px);margin-bottom:8px">Review & <em>pay</em></h1>
+      <p class="hero-sub" style="margin-bottom:0;font-size:14px">Confirm your order details before placing</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="two-col">
+      <div>
+        <div class="sec-label" style="margin-bottom:12px">Order summary</div>
+        <div class="card" style="margin-bottom:18px">
+          <table class="sum-table">
+            <tr><td class="muted">Document</td><td id="sumDoc">—</td></tr>
+            <tr><td class="muted">Copies</td><td id="sumCopies">1×</td></tr>
+            <tr><td class="muted">Color</td><td id="sumColor">B&W</td></tr>
+            <tr><td class="muted">Paper / Sides</td><td id="sumPaper">A4 · Single</td></tr>
+            <tr><td class="muted">Binding</td><td id="sumBind">None</td></tr>
+            <tr><td class="muted">Shop</td><td id="sumShop">—</td></tr>
+            <tr><td class="muted">Print cost</td><td id="sumPrintCost">₹1</td></tr>
+            <tr id="sumDiscountRow" style="display:none"><td class="muted">Discount</td><td id="sumDiscount" class="discount">-₹0</td></tr>
+            <tr id="sumPromoRow" style="display:none"><td class="muted">Promo code</td><td id="sumPromo">—</td></tr>
+            <tr><td class="muted">Platform fee</td><td>₹1</td></tr>
+            <tr><td style="color:var(--blue)">Total</td><td id="sumTotal" style="color:var(--blue)">₹2</td></tr>
+          </table>
+        </div>
+        <div class="sec-label" style="margin-bottom:12px">Payment method</div>
+        <div class="pay-option selected" id="pay-upi" onclick="selectPay('upi')">
+          <div class="pay-logo">📱</div><div><div class="pay-name">UPI / GPay / PhonePe</div><div class="pay-sub">Instant · No extra charges</div></div>
+          <div class="pay-radio"><div class="pay-radio-dot"></div></div>
+        </div>
+        <div class="pay-option" id="pay-card" onclick="selectPay('card')">
+          <div class="pay-logo">💳</div><div><div class="pay-name">Debit / Credit Card</div><div class="pay-sub">Visa, Mastercard, RuPay</div></div>
+          <div class="pay-radio"></div>
+        </div>
+        <div class="pay-option" id="pay-cash" onclick="selectPay('cash')">
+          <div class="pay-logo">💵</div><div><div class="pay-name">Pay at shop</div><div class="pay-sub">Cash or card at counter</div></div>
+          <div class="pay-radio"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="sec-label" style="margin-bottom:10px">Promo / referral code</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="promoInput" type="text" placeholder="Try PRINT10" style="flex:1;min-width:180px;padding:10px 13px;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;color:var(--ink);background:var(--surface-2)" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='rgba(0,0,0,0.1)'">
+            <button onclick="applyPromo()" style="padding:10px 16px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Apply</button>
+          </div>
+          <div style="font-size:12px;color:var(--ink-60);margin-top:10px;line-height:1.7">Test codes: PRINT10, SAVE5, DOC15, CAMPUS20, WELCOME7</div>
+          <div id="promoMsg" style="font-size:12px;margin-top:7px;min-height:16px"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="sec-label" style="margin-bottom:10px">Pickup info</div>
+          <div style="font-size:13px;color:var(--ink-60);line-height:1.9">
+            📍 Show OTP at the shop counter<br>
+            ⏱ Ready in <strong id="etaText">8–10 min</strong> after payment<br>
+            💬 WhatsApp alert when ready
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;background:var(--green-bg);border-color:rgba(10,138,92,0.15)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:22px">🔒</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--green)">Secure & encrypted</div><div style="font-size:12px;color:var(--green);opacity:.7;margin-top:2px">Files auto-deleted after printing</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:26px">
+      <button class="btn-primary" id="payBtn" onclick="placeOrder()">
+        <span id="payBtnTxt">Place order</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ S5: TRACKING ══════ -->
+<div class="screen" id="s5">
+  <div class="wrap">
+    <div style="padding-top:20px"></div>
+    <div class="track-header printing" id="trackHeader">
+      <div class="track-icon-big" id="trackIcon">🖨️</div>
+      <div class="track-status" id="trackStatus">Printing in progress…</div>
+      <div class="track-sub-text" id="trackSubText">Your shop is working on your order</div>
+    </div>
+    <div class="two-col">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="sec-label" style="margin-bottom:0">Order #<span id="orderNum">—</span></div>
+          <span class="badge badge-blue" id="trackBadge">Printing</span>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <table class="sum-table" style="font-size:13px">
+            <tr><td class="muted">Document</td><td id="trkDoc">—</td></tr>
+            <tr><td class="muted">Shop</td><td id="trkShop">—</td></tr>
+            <tr><td class="muted">Details</td><td id="trkDetails">—</td></tr>
+            <tr><td class="muted">Amount paid</td><td id="trkPaid">—</td></tr>
+          </table>
+        </div>
+        <div class="sec-label" style="margin-bottom:12px">Live status</div>
+        <div class="track-steps">
+          <div class="track-step"><div><div class="ts-dot done" id="dot1">✓</div><div class="ts-line"></div></div><div style="padding-top:4px"><div class="ts-title">Order confirmed</div><div class="ts-sub">Shop accepted your request</div></div></div>
+          <div class="track-step"><div><div class="ts-dot active" id="dot2">⋯</div><div class="ts-line"></div></div><div style="padding-top:4px"><div class="ts-title">Printing in progress</div><div class="ts-sub" id="sub2">Estimated 5–8 minutes remaining</div></div></div>
+          <div class="track-step is-pending" id="stepReady"><div><div class="ts-dot pending" id="dot3">3</div><div class="ts-line"></div></div><div style="padding-top:4px"><div class="ts-title">Ready for pickup</div><div class="ts-sub">Head to the counter with your code</div></div></div>
+          <div class="track-step is-pending" id="stepCollect"><div><div class="ts-dot pending" id="dot4">4</div></div><div style="padding-top:4px"><div class="ts-title">Collected</div><div class="ts-sub">Order complete</div></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="otp-card">
+          <div class="otp-label-text">Pickup code</div>
+          <div class="otp-code" id="otpCode">—</div>
+          <div class="otp-hint">Show at the shop counter</div>
+        </div>
+        <div class="card" id="readyCard" style="display:none;background:var(--green-bg);border-color:rgba(10,138,92,0.2);text-align:center">
+          <div style="font-size:40px;margin-bottom:10px">🎉</div>
+          <div style="font-size:17px;font-weight:600;color:var(--green);margin-bottom:5px">Your print is ready!</div>
+          <div style="font-size:13px;color:var(--green);opacity:.75">Head to the counter now</div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="sec-label" style="margin-bottom:10px">Shop contact</div>
+          <div style="font-size:13px;color:var(--ink-60);margin-bottom:10px" id="shopContact">—</div>
+          <button id="callShopBtn" style="width:100%;padding:10px;background:none;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--ink-60)" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background='none'" onclick="callSelectedShop()">📞 Call shop</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+      <div id="waitingHint" style="text-align:center;padding:14px;background:var(--surface-3);border-radius:var(--radius);font-size:13px;color:var(--ink-60)">⏳ Waiting for shop to confirm your print is ready…</div>
+      <button class="btn-primary" id="printAgainBtn" style="display:none" onclick="fullReset()">Print another document <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ ORDERS SCREEN ══════ -->
+<div class="screen" id="orders">
+  <div class="page-hero hero-mini">
+    <div class="wrap">
+      <button class="back-btn" onclick="goTo('s1')">← Back</button>
+      <h1 class="hero-title" style="font-size:clamp(26px,4vw,46px);margin-bottom:8px">My <em>orders</em></h1>
+      <p class="hero-sub" style="margin-bottom:0;font-size:14px">All your print jobs in one place</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="stTotal">0</div><div class="stat-lbl">Total orders</div></div>
+      <div class="stat-card"><div class="stat-num" id="stActive" style="color:var(--blue)">0</div><div class="stat-lbl">Active</div></div>
+      <div class="stat-card"><div class="stat-num" id="stDone" style="color:var(--green)">0</div><div class="stat-lbl">Completed</div></div>
+      <div class="stat-card"><div class="stat-num" id="stSpend">₹0</div><div class="stat-lbl">Total spent</div></div>
+    </div>
+    <div class="order-tabs">
+      <button class="order-tab active" id="tab-all" onclick="filterOrders('all')">All</button>
+      <button class="order-tab" id="tab-active" onclick="filterOrders('active')">Active</button>
+      <button class="order-tab" id="tab-done" onclick="filterOrders('done')">Completed</button>
+    </div>
+    <div class="orders-list" id="ordersList"></div>
+  </div>
+</div>
+
+</div><!-- screens-outer -->
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title" id="mTitle">Order details</div>
+    <div style="font-size:13px;color:var(--ink-60);margin-bottom:20px" id="mDate">—</div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// ══════════════════════════════════════════
+//  localStorage DB
+// ══════════════════════════════════════════
+const DB = {
+  KEY: 'neardoc_v2',
+  all()   { try { return JSON.parse(localStorage.getItem(this.KEY)||'[]'); } catch{ return []; } },
+  save(d) { localStorage.setItem(this.KEY, JSON.stringify(d)); },
+  add(o)  { const d=this.all(); d.unshift(o); this.save(d); return o; },
+  update(id,p){ const d=this.all(); const i=d.findIndex(x=>x.id===id); if(i>-1){d[i]={...d[i],...p};this.save(d);return d[i];} },
+  del(id) { this.save(this.all().filter(x=>x.id!==id)); },
+  active(){ return this.all().filter(x=>x.status==='printing'||x.status==='ready'); }
+};
+
+// Seed demo orders on first load
+if(!localStorage.getItem(DB.KEY)){
+  const t=Date.now();
+  DB.add({id:'PN1001',userId:'demo-user',doc:'Lab_Report.pdf',icon:'🔬',copies:2,color:'bw',size:'a4',sides:'single',bind:'staple',delivery:'pickup',shop:1,shopName:'QuickPrint Hub',payment:'upi',price:34,otp:'3821',status:'collected',createdAt:t-172800000,notes:'',promoCode:'',discountAmount:0});
+  DB.add({id:'PN1002',userId:'demo-user',doc:'Notes_Chapter3.pdf',icon:'📄',copies:1,color:'clr',size:'a4',sides:'single',bind:'none',delivery:'pickup',shop:2,shopName:'Campus Copy Centre',payment:'upi',price:66,otp:'5519',status:'collected',createdAt:t-86400000,notes:'',promoCode:'',discountAmount:0});
+}
+
+// ══════════════════════════════════════════
+//  APP STATE
+// ══════════════════════════════════════════
+const ST = {
+  files:[], copies:1, color:'bw', size:'a4', sides:'single',
+  bind:'none', delivery:'pickup', shop:null, payment:'upi',
+  promoCode:'', promoPercent:0, orderId:null, filter:'all'
+};
+if(window.pdfjsLib){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+let SHOPS = {};
+const FLOW = ['s1','s2','s3','s4','s5'];
+const PROMO_CODES = {
+  PRINT10:{percent:10,label:'10% off'},
+  SAVE5:{percent:5,label:'5% off'},
+  DOC15:{percent:15,label:'15% off'},
+  CAMPUS20:{percent:20,label:'20% off'},
+  WELCOME7:{percent:7,label:'7% off'}
+};
+
+function normalizeEta(eta){
+  return String(eta||'10 min').replace(/–/g,'-');
+}
+function parseEtaMinutes(eta){
+  const nums = normalizeEta(eta).match(/\d+/g);
+  if(!nums || !nums.length) return 10;
+  return Math.round(nums.map(Number).reduce((sum,n)=>sum+n,0)/nums.length);
+}
+function getRegisteredShops(){
+  try{return JSON.parse(localStorage.getItem('neardoc_shops')||'[]')}catch{return[]}
+}
+function getCurrentDayName(){
+  return new Date().toLocaleDateString('en-US',{weekday:'long'});
+}
+function getMinutesFromTime(value){
+  if(!value || !/^\d{2}:\d{2}$/.test(value)) return null;
+  const [h,m]=value.split(':').map(Number);
+  return h*60+m;
+}
+function isShopOpenNow(shop){
+  if(!shop.hours || typeof shop.hours!=='object' || !Object.keys(shop.hours).length) return true;
+  const today = shop.hours[getCurrentDayName()];
+  if(!today || !today.open) return false;
+  const from = getMinutesFromTime(today.from);
+  const to = getMinutesFromTime(today.to);
+  if(from===null || to===null) return true;
+  const now = new Date();
+  const mins = now.getHours()*60+now.getMinutes();
+  return mins>=from && mins<=to;
+}
+function shopStatusMeta(shop){
+  if(shop.status==='pending') return {label:'Pending',badge:'badge-amber',selectable:false};
+  if(shop.status==='suspended') return {label:'Suspended',badge:'badge-red',selectable:false};
+  if(!isShopOpenNow(shop)) return {label:'Closed',badge:'badge-red',selectable:true};
+  return {label:'Open',badge:'badge-green',selectable:true};
+}
+function buildAllShopMap(){
+  const map={};
+  getRegisteredShops().forEach(shop=>{
+    map[shop.id]={
+      id:shop.id,
+      name:shop.name,
+      contact:shop.phone||shop.contact||'',
+      eta:normalizeEta(shop.eta||'8-10 min'),
+      rating:shop.rating||4.6,
+      distance:shop.distance||'Campus',
+      icon:shop.logo?'🏪':'🖨️',
+      priceBw:Number(shop.priceBw)||2,
+      priceClr:Number(shop.priceClr)||8,
+      status:shop.status||'pending',
+      hours:shop.hours||{},
+      tagline:shop.tagline||'',
+      campus:shop.campus||'',
+      about:shop.about||''
+    };
+  });
+  return map;
+}
+function getAvailableShops(){
+  return Object.values(buildAllShopMap())
+    .filter(shop=>shop.status==='verified')
+    .sort((a,b)=>parseEtaMinutes(a.eta)-parseEtaMinutes(b.eta));
+}
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function goTo(id){
+  if(id==='s2' && !ST.files.length){ showToast('⚠️ Please upload a document first'); return; }
+  if(id==='s4' && !ST.shop){ showToast('⚠️ Please select a shop first'); return; }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById(id);
+  el.style.animation='none'; el.offsetHeight; el.style.animation='';
+  el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  const fi=FLOW.indexOf(id);
+  for(let i=0;i<5;i++){
+    const ns=document.getElementById('ns'+i);
+    if(!ns)continue;
+    ns.classList.remove('active','done');
+    if(i===fi) ns.classList.add('active');
+    else if(fi>0&&i<fi){ ns.classList.add('done'); ns.onclick=(s=>()=>goTo(s))(FLOW[i]); }
+    else{ ns.style.cursor='default'; ns.onclick=null; }
+  }
+  if(id==='s2') fillS2();
+  if(id==='s4') fillS4();
+  if(id==='orders') renderOrders();
+  if(id==='s1') renderHomeRecent();
+  syncBadge();
+}
+
+// ══════════════════════════════════════════
+//  FILE UPLOAD
+// ══════════════════════════════════════════
+const fi=document.getElementById('fileInput');
+const uz=document.getElementById('uploadZone');
+uz.addEventListener('click',()=>fi.click());
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag-over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag-over'));
+uz.addEventListener('drop',async e=>{
+  e.preventDefault();
+  uz.classList.remove('drag-over');
+  const files=Array.from(e.dataTransfer.files||[]);
+  if(files.length) await handleSelectedFiles(files);
+});
+fi.addEventListener('change',async e=>{
+  const files=Array.from(e.target.files||[]);
+  if(files.length) await handleSelectedFiles(files);
+  fi.value='';
+});
+
+function iconFor(n){return{pdf:'📄',doc:'📝',docx:'📝',png:'🖼️',jpg:'🖼️',jpeg:'🖼️'}[n.split('.').pop().toLowerCase()]||'📄';}
+
+function readFileAsDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(reader.error||new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleSelectedFiles(files){
+  const loaded=await Promise.all(files.map(async file=>({
+    name:file.name,
+    size:formatFileSize(file.size),
+    icon:iconFor(file.name),
+    pages:await detectPageCount(file),
+    raw:file,
+    bytes:file.size,
+    mimeType:file.type||'application/octet-stream',
+    downloadUrl:await readFileAsDataUrl(file)
+  })));
+  addFiles(loaded);
+}
+
+function formatFileSize(bytes){
+  const size=Math.max(0,Number(bytes)||0);
+  if(size<1024) return size+' B';
+  if(size<1048576) return (size/1024).toFixed(1)+' KB';
+  if(size<1073741824) return (size/1048576).toFixed(1)+' MB';
+  return (size/1073741824).toFixed(1)+' GB';
+}
+
+async function detectPageCount(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext!=='pdf') return 1;
+  try{
+    if(window.pdfjsLib){
+      const data=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data}).promise;
+      return Math.max(1,pdf.numPages||1);
+    }
+  }catch(err){
+    console.warn('PDF.js page detection failed, using fallback parser.',err);
+  }
+  try{
+    const data=await file.arrayBuffer();
+    const text=new TextDecoder('latin1').decode(data);
+    const matches=text.match(/\/Type\s*\/Page\b/g);
+    return Math.max(1,matches?matches.length:1);
+  }catch(err){
+    console.warn('Fallback PDF page detection failed.',err);
+    return 1;
+  }
+}
+
+function formatPages(pages,estimated){
+  const count=Math.max(1,Number(pages)||1);
+  return count+' page'+(count===1?'':'s')+(estimated?' (est.)':'');
+}
+
+function addFiles(files){
+  const existing=new Set(ST.files.map(file=>file.name+'__'+file.size));
+  const fresh=files
+    .map(file=>({...file,pages:Math.max(1,Number(file.pages)||1),copies:Math.max(1,Number(file.copies)||1),raw:file.raw||null,bytes:Number(file.bytes)||0,downloadUrl:file.downloadUrl||'',mimeType:file.mimeType||'application/octet-stream'}))
+    .filter(file=>!existing.has(file.name+'__'+file.size));
+  ST.files.push(...fresh);
+  renderFilePreview();
+  renderCopiesEditor();
+  updatePrice();
+  syncShopPrices();
+  showToast(fresh.length?`✓ Loaded ${fresh.length} file${fresh.length===1?'':'s'}`:'All selected files are already added');
+}
+function useSample(name,size,icon,pages){
+  const ext=name.split('.').pop().toLowerCase();
+  const mime=ext==='pdf'?'application/pdf':'text/plain';
+  const content=`NearDoc sample file\nName: ${name}\nPages: ${pages}\nGenerated for shop download preview.`;
+  addFiles([{
+    name,size,icon,pages,raw:null,bytes:0,mimeType:mime,
+    downloadUrl:`data:text/plain;charset=utf-8,${encodeURIComponent(content)}`
+  }]);
+}
+function removeFile(){
+  ST.files=[];
+  renderFilePreview();
+  renderCopiesEditor();
+  updatePrice();
+  syncShopPrices();
+}
+function removeFileAt(index){
+  ST.files.splice(index,1);
+  renderFilePreview();
+  renderCopiesEditor();
+  updatePrice();
+  syncShopPrices();
+}
+function totalPages(){
+  return ST.files.reduce((sum,file)=>sum+Math.max(1,Number(file.pages)||1),0);
+}
+function totalCopiesCount(){
+  return ST.files.reduce((sum,file)=>sum+Math.max(1,Number(file.copies)||1),0);
+}
+function totalSizeBytes(){
+  return ST.files.reduce((sum,file)=>sum+(typeof file.raw?.size==='number'?file.raw.size:(Number(file.bytes)||0)),0);
+}
+function fileSummaryText(){
+  const parts=[ST.files.length+' file'+(ST.files.length===1?'':'s'),formatPages(totalPages()||1,false)];
+  const bytes=totalSizeBytes();
+  if(bytes>0) parts.unshift(formatFileSize(bytes));
+  return parts.join(' · ');
+}
+function renderFilePreview(){
+  const wrap=document.getElementById('filePreviewWrap');
+  const sample=document.getElementById('sampleSection');
+  const list=document.getElementById('fileList');
+  if(!ST.files.length){
+    wrap.style.display='none';
+    sample.style.display='block';
+    list.innerHTML='';
+    return;
+  }
+  wrap.style.display='block';
+  sample.style.display='none';
+  document.getElementById('prevIcon').textContent=ST.files[0].icon;
+  document.getElementById('prevName').textContent='Selected documents';
+  document.getElementById('prevMeta').textContent=fileSummaryText();
+  list.innerHTML=ST.files.map((file,index)=>`
+    <div class="file-preview">
+      <div class="file-icon-wrap">${file.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div class="file-name">${file.name}</div>
+        <div class="file-meta">${file.size} · ${formatPages(file.pages,false)} · ${file.copies} cop${file.copies===1?'y':'ies'} · ${file.name.split('.').pop().toUpperCase()}</div>
+      </div>
+      <button class="file-remove" onclick="removeFileAt(${index})">×</button>
+    </div>
+  `).join('');
+}
+function renderCopiesEditor(){
+  const editor=document.getElementById('copiesEditor');
+  if(!editor) return;
+  if(!ST.files.length){
+    editor.innerHTML='<div style="font-size:13px;color:var(--ink-30)">Upload documents to set copies for each file.</div>';
+    return;
+  }
+  editor.innerHTML=ST.files.map((file,index)=>`
+    <div class="file-preview">
+      <div class="file-icon-wrap">${file.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div class="file-name">${file.name}</div>
+        <div class="file-meta">${formatPages(file.pages,false)} · ${file.size}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="stepper-wrap">
+          <button class="stepper-btn" onclick="changeFileCopies(${index},-1)">−</button>
+          <div class="stepper-val">${file.copies}</div>
+          <button class="stepper-btn" onclick="changeFileCopies(${index},1)">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+//  OPTIONS
+// ══════════════════════════════════════════
+function setChip(group,el){
+  ST[group]=el.dataset.val;
+  document.querySelectorAll('[data-group="'+group+'"]').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  updatePrice(); syncShopPrices();
+}
+function changeFileCopies(index,d){
+  const file=ST.files[index];
+  if(!file) return;
+  file.copies=Math.max(1,Math.min(99,(file.copies||1)+d));
+  renderFilePreview();
+  renderCopiesEditor();
+  updatePrice(); syncShopPrices();
+}
+function getShopUnitPrice(shopId){
+  const shop=shopId?SHOPS[shopId]:null;
+  if(ST.color==='clr') return Math.max(1,Number(shop?.priceClr)||8);
+  return Math.max(1,Number(shop?.priceBw)||2);
+}
+function calcPrice(shopId){
+  let pp=getShopUnitPrice(shopId);
+  let b=ST.files.reduce((sum,file)=>{
+    let pages=Math.max(1,Number(file.pages)||1);
+    let fileCost=pp*pages*Math.max(1,Number(file.copies)||1);
+    if(ST.sides==='double') fileCost=Math.round(fileCost*1.2);
+    return sum+fileCost;
+  },0);
+  if(ST.size==='a3')b=Math.round(b*1.5);
+  if(ST.bind==='spiral')b+=20;
+  if(ST.promoPercent>0)b=Math.max(1,b-Math.round((b*ST.promoPercent)/100));
+  return Math.max(1,b);
+}
+function calcBasePrintCost(shopId){
+  let pp=getShopUnitPrice(shopId);
+  let base=ST.files.reduce((sum,file)=>{
+    let pages=Math.max(1,Number(file.pages)||1);
+    let fileCost=pp*pages*Math.max(1,Number(file.copies)||1);
+    if(ST.sides==='double') fileCost=Math.round(fileCost*1.2);
+    return sum+fileCost;
+  },0);
+  if(ST.size==='a3') base=Math.round(base*1.5);
+  if(ST.bind==='spiral') base+=20;
+  return Math.max(1,base);
+}
+function calcDiscountAmount(){
+  if(ST.promoPercent<=0) return 0;
+  return Math.round((calcBasePrintCost(ST.shop)*ST.promoPercent)/100);
+}
+function updatePrice(){
+  const p=calcPrice(ST.shop);
+  const e=document.getElementById('priceAmt'); if(e)e.textContent=p;
+  const b=document.getElementById('priceBreak');
+  if(b)b.textContent=formatPages(totalPages()||1,false)+' · '+totalCopiesCount()+' total cop'+(totalCopiesCount()>1?'ies':'y')+' · '+(ST.color==='clr'?'Color':'B&W')+' · '+ST.size.toUpperCase()+' · '+(ST.sides==='double'?'Double':'Single')+'-sided'+(ST.promoCode?' · '+ST.promoCode+' applied':'');
+}
+function shopTotal(shopId){
+  return calcPrice(shopId);
+}
+function safeHtml(value){
+  return String(value)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function renderShopCards(){
+  SHOPS=buildAllShopMap();
+  const shops=getAvailableShops();
+  const grid=document.getElementById('shopGrid');
+  const empty=document.getElementById('noShopMsg');
+  const summary=document.getElementById('shopsHeroSub');
+  const mapSummary=document.getElementById('shopMapSummary');
+  if(ST.shop && !shops.some(shop=>String(shop.id)===String(ST.shop))) ST.shop=null;
+  if(summary) summary.textContent=shops.length?shops.length+' verified print shop'+(shops.length===1?'':'s')+' near your campus':'No verified print shops available right now';
+  if(mapSummary) mapSummary.textContent='📍 '+(shops.length?shops.length+' shop'+(shops.length===1?'':'s')+' nearby':'No shops nearby right now')+' · You are here';
+  if(empty) empty.style.display=shops.length?'none':'block';
+  if(!grid) return;
+  if(!shops.length){
+    grid.innerHTML='';
+    const btn=document.getElementById('shopBtn');
+    if(btn) btn.disabled=true;
+    return;
+  }
+  grid.innerHTML=shops.map((shop,index)=>{
+    const meta=shopStatusMeta(shop);
+    const selected=String(ST.shop)===String(shop.id)?' selected':'';
+    const badgeClass=index===0?'badge badge-blue':`badge ${meta.badge}`;
+    const badgeLabel=index===0?'Recommended':'● '+meta.label;
+    const details=[
+      shop.distance?'📍 '+shop.distance:'',
+      shop.eta?'⏱ ~'+normalizeEta(shop.eta):'',
+      shop.rating?'⭐ '+shop.rating:''
+    ].filter(Boolean).map(detail=>`<span>${safeHtml(detail)}</span>`).join('');
+    return `<div class="shop-card${selected}" id="shop-${shop.id}" onclick="selectShop(${shop.id})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px"><div class="shop-avatar">${safeHtml(shop.icon||'🖨️')}</div><span class="${badgeClass}">${badgeLabel}</span></div>
+      <div class="shop-name">${safeHtml(shop.name)}</div>
+      <div class="shop-meta">${details}</div>
+      <div style="font-size:12px;color:var(--ink-60);margin-top:8px">${safeHtml(shop.tagline||shop.campus||'Available for campus printing')}</div>
+      <div style="border-top:1px solid rgba(0,0,0,0.06);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="font-size:18px;font-weight:700;color:var(--ink)">₹${shopTotal(shop.id)}<span style="font-size:12px;font-weight:400;color:var(--ink-60)"> total</span></div>
+        <span class="badge badge-ink">B&W ₹${Math.max(1,Number(shop.priceBw)||2)} / Color ₹${Math.max(1,Number(shop.priceClr)||8)}</span>
+      </div>
+    </div>`;
+  }).join('');
+  const btn=document.getElementById('shopBtn');
+  if(btn) btn.disabled=!ST.shop;
+}
+function syncShopPrices(){
+  renderShopCards();
+  syncPayScreen();
+}
+function syncPayScreen(){
+  const total=calcPrice(ST.shop)+2;
+  const preDiscountPrint=calcBasePrintCost(ST.shop);
+  const st=document.getElementById('sumTotal'); if(st)st.textContent='₹'+total;
+  const sc=document.getElementById('sumPrintCost'); if(sc)sc.textContent='₹'+preDiscountPrint;
+  const pb=document.getElementById('payBtnTxt'); if(pb)pb.textContent='Place order · ₹'+total;
+}
+
+// ══════════════════════════════════════════
+//  SHOPS
+// ══════════════════════════════════════════
+function selectShop(id){
+  const shop=SHOPS[id];
+  if(!shop || !shopStatusMeta(shop).selectable){
+    showToast('⚠️ This shop is not available right now');
+    return;
+  }
+  ST.shop=id;
+  renderShopCards();
+  const et=document.getElementById('etaText'); if(et)et.textContent=shop.eta;
+}
+
+// ══════════════════════════════════════════
+//  PAYMENT
+// ══════════════════════════════════════════
+function selectPay(type){
+  ST.payment=type;
+  ['upi','card','cash'].forEach(p=>{
+    const el=document.getElementById('pay-'+p);
+    const r=el.querySelector('.pay-radio');
+    el.classList.remove('selected');
+    r.innerHTML='';
+    r.style.background='';
+    r.style.borderColor='rgba(0,0,0,0.15)';
+  });
+  const el=document.getElementById('pay-'+type);
+  el.classList.add('selected');
+  const r=el.querySelector('.pay-radio');
+  r.innerHTML='<div class="pay-radio-dot"></div>';
+}
+function applyPromo(){
+  const code=document.getElementById('promoInput').value.trim().toUpperCase();
+  const msg=document.getElementById('promoMsg');
+  const promo=PROMO_CODES[code];
+  if(promo){
+    ST.promoCode=code;
+    ST.promoPercent=promo.percent;
+    msg.style.color='var(--green)';
+    msg.textContent='✓ '+code+' applied! '+promo.label;
+    updatePrice();
+    syncShopPrices();
+    fillS4();
+    showToast('🎁 '+code+' applied - '+promo.label);
+  } else if(!code){
+    ST.promoCode='';
+    ST.promoPercent=0;
+    msg.style.color='var(--red)'; msg.textContent='Enter a promo code first.';
+    updatePrice();
+    syncShopPrices();
+    fillS4();
+  } else {
+    ST.promoCode='';
+    ST.promoPercent=0;
+    msg.style.color='var(--red)'; msg.textContent='✗ Invalid code. Try PRINT10, SAVE5, DOC15, CAMPUS20, or WELCOME7';
+    updatePrice();
+    syncShopPrices();
+    fillS4();
+  }
+}
+
+// ══════════════════════════════════════════
+//  POPULATE SCREENS
+// ══════════════════════════════════════════
+function fillS2(){
+  if(!ST.files.length)return;
+  document.getElementById('s2Icon').textContent=ST.files[0].icon;
+  document.getElementById('s2Name').textContent=ST.files.length===1?ST.files[0].name:ST.files.length+' files ready';
+  document.getElementById('s2Meta').textContent=fileSummaryText();
+  renderCopiesEditor();
+  updatePrice();
+}
+function fillS4(){
+  const total=calcPrice(ST.shop)+2;
+  const preDiscountPrint=calcBasePrintCost(ST.shop);
+  const BL={none:'None',staple:'Staple',spiral:'Spiral bind'};
+  const discount=calcDiscountAmount();
+  setText('sumDoc',ST.files.length?(ST.files.length===1?ST.files[0].name:ST.files.length+' files · '+formatPages(totalPages(),false)):'—');
+  setText('sumCopies',totalCopiesCount()+' total');
+  setText('sumColor',ST.color==='clr'?'Color':'B&W');
+  setText('sumPaper',ST.size.toUpperCase()+' · '+(ST.sides==='double'?'Double':'Single')+'-sided');
+  setText('sumBind',BL[ST.bind]||'None');
+  setText('sumShop',ST.shop?SHOPS[ST.shop].name:'—');
+  setText('sumPrintCost','₹'+preDiscountPrint);
+  setText('sumDiscount','-₹'+discount);
+  setText('sumPromo',ST.promoCode?ST.promoCode+' ('+ST.promoPercent+'% off)':'—');
+  document.getElementById('sumDiscountRow').style.display=discount>0?'table-row':'none';
+  document.getElementById('sumPromoRow').style.display=ST.promoCode?'table-row':'none';
+  setText('sumTotal','₹'+total);
+  setText('payBtnTxt','Place order · ₹'+total);
+  document.getElementById('sumTotal').style.color='var(--blue)';
+  if(ST.shop){const et=document.getElementById('etaText');if(et)et.textContent=SHOPS[ST.shop].eta;}
+}
+function setText(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+
+// ══════════════════════════════════════════
+//  PLACE ORDER
+// ══════════════════════════════════════════
+function placeOrder(){
+  const btn=document.getElementById('payBtn');
+  btn.disabled=true;
+  setText('payBtnTxt','Processing…');
+  setTimeout(()=>{
+    const total=calcPrice(ST.shop)+2;
+    const id='PN'+(1003+DB.all().length);
+    const otp=String(Math.floor(1000+Math.random()*9000));
+    const docLabel=ST.files.length===1?ST.files[0].name:ST.files.length+' files';
+    const sess=getSession();
+    const order=DB.add({
+      id, doc:docLabel, icon:ST.files[0]?ST.files[0].icon:'📄',
+      userId:sess?.id||null,
+      copies:totalCopiesCount(), color:ST.color, size:ST.size, sides:ST.sides,
+      bind:ST.bind, delivery:ST.delivery, shop:ST.shop, shopName:SHOPS[ST.shop].name,
+      payment:ST.payment, price:total, otp, status:'printing',
+      files:ST.files.map(file=>({name:file.name,size:file.size,pages:file.pages,icon:file.icon,copies:file.copies,downloadUrl:file.downloadUrl||'',mimeType:file.mimeType||'application/octet-stream'})),
+      createdAt:Date.now(), notes:document.getElementById('specialInstr').value||'',
+      promoCode:ST.promoCode, discountAmount:calcDiscountAmount()
+    });
+    ST.orderId=id;
+    showToast('🎉 Order #'+id+' placed!');
+    btn.disabled=false;
+    resetTrack();
+    setText('orderNum',id);
+    setText('trkDoc',order.doc);
+    setText('trkShop',order.shopName);
+    setText('trkDetails',order.copies+'× '+(order.color==='clr'?'Color':'B&W')+' '+order.size.toUpperCase());
+    setText('trkPaid','₹'+order.price+' via '+(order.payment==='upi'?'UPI':order.payment==='card'?'Card':'Cash'));
+    setText('otpCode',order.otp);
+    setText('shopContact',SHOPS[order.shop].name+' · '+SHOPS[order.shop].contact);
+    document.getElementById('callShopBtn').disabled=false;
+    syncBadge();
+    goTo('s5');
+  },1200);
+}
+
+function callSelectedShop(){
+  const shop=SHOPS[ST.shop];
+  if(!shop){
+    showToast('Select a shop first');
+    return;
+  }
+  window.location.href='tel:'+shop.contact.replace(/[^\d+]/g,'');
+}
+
+// ══════════════════════════════════════════
+//  TRACKING
+// ══════════════════════════════════════════
+function resetTrack(){
+  document.getElementById('trackHeader').className='track-header printing';
+  setText('trackIcon','🖨️'); setText('trackStatus','Printing in progress…');
+  setText('trackSubText','Your shop is working on your order');
+  document.getElementById('trackBadge').textContent='Printing';
+  document.getElementById('trackBadge').className='badge badge-blue';
+  document.getElementById('dot2').className='ts-dot active'; setText('dot2','⋯');
+  document.getElementById('dot3').className='ts-dot pending'; setText('dot3','3');
+  document.getElementById('dot4').className='ts-dot pending'; setText('dot4','4');
+  document.getElementById('stepReady').classList.add('is-pending');
+  document.getElementById('stepCollect').classList.add('is-pending');
+  document.getElementById('readyCard').style.display='none';
+  setText('sub2','Estimated 5–8 minutes remaining');
+  const wh=document.getElementById('waitingHint'); if(wh)wh.style.display='block';
+  document.getElementById('printAgainBtn').style.display='none';
+}
+function markReady(){
+  if(ST.orderId)DB.update(ST.orderId,{status:'ready'});
+  document.getElementById('trackHeader').className='track-header ready';
+  setText('trackIcon','✅'); setText('trackStatus','Ready for pickup!');
+  setText('trackSubText','Head to the counter and show your OTP');
+  document.getElementById('trackBadge').textContent='Ready';
+  document.getElementById('trackBadge').className='badge badge-green';
+  document.getElementById('dot2').className='ts-dot done'; setText('dot2','✓');
+  setText('sub2','Completed');
+  document.getElementById('dot3').className='ts-dot active'; setText('dot3','●');
+  document.getElementById('stepReady').classList.remove('is-pending');
+  document.getElementById('readyCard').style.display='block';
+  const wh=document.getElementById('waitingHint'); if(wh)wh.style.display='none';
+  syncBadge(); showToast('✅ Your print is ready for pickup!');
+}
+function markCollected(){
+  if(ST.orderId)DB.update(ST.orderId,{status:'collected'});
+  document.getElementById('trackHeader').className='track-header collected';
+  setText('trackIcon','🎉'); setText('trackStatus','Order collected!');
+  setText('trackSubText','Thanks for using NearDoc');
+  document.getElementById('trackBadge').textContent='Done';
+  document.getElementById('trackBadge').className='badge badge-ink';
+  document.getElementById('dot3').className='ts-dot done'; setText('dot3','✓');
+  document.getElementById('dot4').className='ts-dot done'; setText('dot4','✓');
+  document.getElementById('stepCollect').classList.remove('is-pending');
+  const wh=document.getElementById('waitingHint'); if(wh)wh.style.display='none';
+  document.getElementById('printAgainBtn').style.display='flex';
+  syncBadge(); showToast('🎉 Order complete! See you again.');
+}
+
+// UI-only state restorers (no DB writes – used when reopening an already-updated order)
+function markReady_ui(){
+  document.getElementById('trackHeader').className='track-header ready';
+  setText('trackIcon','✅'); setText('trackStatus','Ready for pickup!');
+  setText('trackSubText','Head to the counter and show your OTP');
+  document.getElementById('trackBadge').textContent='Ready';
+  document.getElementById('trackBadge').className='badge badge-green';
+  document.getElementById('dot2').className='ts-dot done'; setText('dot2','✓');
+  setText('sub2','Completed');
+  document.getElementById('dot3').className='ts-dot active'; setText('dot3','●');
+  document.getElementById('stepReady').classList.remove('is-pending');
+  document.getElementById('readyCard').style.display='block';
+  const wh=document.getElementById('waitingHint'); if(wh)wh.style.display='none';
+  syncBadge();
+}
+function markCollected_ui(){
+  document.getElementById('trackHeader').className='track-header collected';
+  setText('trackIcon','🎉'); setText('trackStatus','Order collected!');
+  setText('trackSubText','Thanks for using NearDoc');
+  document.getElementById('trackBadge').textContent='Done';
+  document.getElementById('trackBadge').className='badge badge-ink';
+  document.getElementById('dot2').className='ts-dot done'; setText('dot2','✓');
+  setText('sub2','Completed');
+  document.getElementById('dot3').className='ts-dot done'; setText('dot3','✓');
+  document.getElementById('dot4').className='ts-dot done'; setText('dot4','✓');
+  document.getElementById('stepReady').classList.remove('is-pending');
+  document.getElementById('stepCollect').classList.remove('is-pending');
+  document.getElementById('readyCard').style.display='none';
+  const wh=document.getElementById('waitingHint'); if(wh)wh.style.display='none';
+  document.getElementById('printAgainBtn').style.display='flex';
+  syncBadge();
+}
+
+// ══════════════════════════════════════════
+//  ORDERS SCREEN
+// ══════════════════════════════════════════
+function filterOrders(f){
+  ST.filter=f;
+  document.querySelectorAll('.order-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+f).classList.add('active');
+  renderOrders();
+}
+function renderOrders(){
+  const all=getMyOrders();
+  const active=all.filter(o=>o.status==='printing'||o.status==='ready');
+  const done=all.filter(o=>o.status==='collected');
+  const spent=all.reduce((s,o)=>s+(o.price||0),0);
+  setText('stTotal',all.length);
+  setText('stActive',active.length);
+  setText('stDone',done.length);
+  setText('stSpend','₹'+spent);
+  // update tab labels
+  document.getElementById('tab-active').textContent='Active'+(active.length?' ('+active.length+')':'');
+  document.getElementById('tab-done').textContent='Completed'+(done.length?' ('+done.length+')':'');
+  let list=all;
+  if(ST.filter==='active')list=active;
+  if(ST.filter==='done')list=done;
+  const c=document.getElementById('ordersList');
+  if(list.length===0){
+    c.innerHTML=`<div style="text-align:center;padding:48px 20px">
+      <div style="font-size:40px;margin-bottom:12px">📭</div>
+      <div style="font-size:15px;font-weight:500;color:var(--ink-60);margin-bottom:6px">${ST.filter==='active'?'No active orders':ST.filter==='done'?'No completed orders':'No orders yet'}</div>
+      <div style="font-size:13px;color:var(--ink-30)">${ST.filter==='active'?'Place a print order to see it here':'Your print history will appear here'}</div>
+    </div>`;
+    return;
+  }
+  c.innerHTML=list.map(orderCardHTML).join('');
+}
+const SC={
+  printing:{badge:'badge-blue',label:'Printing',prog:40,bar:'var(--blue)'},
+  ready:{badge:'badge-green',label:'Ready!',prog:75,bar:'var(--green)'},
+  collected:{badge:'badge-ink',label:'Done',prog:100,bar:'var(--ink-30)'}
+};
+function orderCardHTML(o){
+  const s=SC[o.status]||SC.collected;
+  const isActive=o.status==='printing'||o.status==='ready';
+  const d=new Date(o.createdAt);
+  const ds=d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  return `<div class="order-card" onclick="openOrderModal('${o.id}')">
+    ${isActive?'<div class="active-pulse"></div>':''}
+    <div class="order-card-header">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+        <div class="order-card-icon">${o.icon||'📄'}</div>
+        <div style="min-width:0"><div class="order-card-title">${o.doc}</div><div class="order-card-sub">${o.shopName} · ${ds}</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+        <span class="badge ${s.badge}">${s.label}</span>
+        <span style="font-size:14px;font-weight:600;color:var(--ink)">₹${o.price}</span>
+      </div>
+    </div>
+    <div class="order-meta-row">
+      <span class="meta-chip">📄 ${o.copies}× ${o.color==='clr'?'Color':'B&W'}</span>
+      <span class="meta-chip">📐 ${o.size.toUpperCase()}</span>
+      <span class="meta-chip">💳 ${o.payment==='upi'?'UPI':o.payment==='card'?'Card':'Cash'}</span>
+      <span class="meta-chip" style="color:var(--ink-30)">#${o.id}</span>
+    </div>
+    ${isActive?`<div class="order-progress">
+      <div class="op-bar"><div class="op-fill" style="width:${s.prog}%;background:${s.bar}"></div></div>
+      <div class="op-label">${o.status==='printing'?'Printing in progress…':'Ready for pickup — head to the counter!'}</div>
+    </div>`:''}
+  </div>`;
+}
+
+function openOrderModal(id){
+  const o=getMyOrders().find(x=>x.id===id); if(!o)return;
+  setText('mTitle','Order #'+o.id);
+  document.getElementById('mDate').textContent=new Date(o.createdAt).toLocaleString('en-IN');
+  const BL={none:'None',staple:'Staple',spiral:'Spiral bind'};
+  const isActive=o.status==='printing'||o.status==='ready';
+  document.getElementById('mBody').innerHTML=`
+    <table class="sum-table" style="margin-bottom:16px">
+      <tr><td class="muted">Document</td><td>${o.doc}</td></tr>
+      <tr><td class="muted">Shop</td><td>${o.shopName}</td></tr>
+      <tr><td class="muted">Copies</td><td>${o.copies}×</td></tr>
+      <tr><td class="muted">Color</td><td>${o.color==='clr'?'Color':'B&W'}</td></tr>
+      <tr><td class="muted">Size / Sides</td><td>${o.size.toUpperCase()} · ${o.sides==='double'?'Double':'Single'}-sided</td></tr>
+      <tr><td class="muted">Binding</td><td>${BL[o.bind]||'None'}</td></tr>
+      ${o.promoCode?`<tr><td class="muted">Promo code</td><td>${o.promoCode}</td></tr>`:''}
+      ${o.discountAmount?`<tr><td class="muted">Discount</td><td class="discount">-₹${o.discountAmount}</td></tr>`:''}
+      <tr><td class="muted">Payment</td><td>${o.payment==='upi'?'UPI':o.payment==='card'?'Card':'Cash'}</td></tr>
+      <tr><td class="muted">Pickup OTP</td><td style="font-family:'Fraunces',serif;font-size:22px;font-weight:400;letter-spacing:6px;color:var(--blue)">${o.otp}</td></tr>
+      <tr><td>Total paid</td><td>₹${o.price}</td></tr>
+    </table>
+    ${o.notes?`<div style="margin-bottom:16px;padding:10px 13px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;color:var(--ink-60)"><strong>Notes:</strong> ${o.notes}</div>`:''}
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${isActive?`<button class="btn-primary" style="flex:1;min-width:120px" onclick="viewLiveOrder('${o.id}')">Track live →</button>`:''}
+      <button class="btn-danger" onclick="deleteOrder('${o.id}')">🗑 Delete</button>
+    </div>`;
+  document.getElementById('orderModal').classList.add('open');
+}
+function closeModal(){ document.getElementById('orderModal').classList.remove('open'); }
+
+function viewLiveOrder(id){
+  const o=getMyOrders().find(x=>x.id===id); if(!o)return;
+  ST.orderId=id; ST.shop=o.shop;
+  closeModal();
+  resetTrack();
+  setText('orderNum',o.id);
+  setText('trkDoc',o.doc);
+  setText('trkShop',o.shopName);
+  setText('trkDetails',o.copies+'× '+(o.color==='clr'?'Color':'B&W')+' '+o.size.toUpperCase());
+  setText('trkPaid','₹'+o.price+' via '+(o.payment==='upi'?'UPI':o.payment==='card'?'Card':'Cash'));
+  setText('otpCode',o.otp);
+  setText('shopContact',SHOPS[o.shop].name+' · '+SHOPS[o.shop].contact);
+  document.getElementById('callShopBtn').disabled=false;
+  // Restore correct UI state based on current DB status (no writes)
+  if(o.status==='ready') markReady_ui();
+  else if(o.status==='collected') markCollected_ui();
+  goTo('s5');
+}
+
+function deleteOrder(id){
+  if(!confirm('Delete order from history?'))return;
+  DB.del(id); closeModal(); renderOrders(); syncBadge();
+  showToast('🗑 Order deleted');
+}
+
+// ══════════════════════════════════════════
+//  HOME RECENT
+// ══════════════════════════════════════════
+function renderHomeRecent(){
+  const orders=getMyOrders().slice(0,4);
+  const el=document.getElementById('homeRecentOrders');
+  if(orders.length===0){ el.innerHTML='<div style="font-size:13px;color:var(--ink-30);padding:10px 0">No orders yet. Upload a document to get started!</div>'; return; }
+  const sb={printing:'<span class="badge badge-blue">Printing</span>',ready:'<span class="badge badge-green">Ready!</span>',collected:'<span class="badge badge-green">Done</span>'};
+  el.innerHTML=orders.map(o=>`
+    <div class="recent-row" onclick="openOrderModal('${o.id}')">
+      <div class="recent-thumb">${o.icon||'📄'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.doc}</div>
+        <div style="font-size:11px;color:var(--ink-60);margin-top:2px">${o.shopName} · ₹${o.price}</div>
+      </div>
+      ${sb[o.status]||''}
+      <span style="color:var(--ink-30);margin-left:6px">›</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  BADGE & RESET & TOAST
+// ══════════════════════════════════════════
+function syncBadge(){
+  const n=getMyOrders().filter(o=>o.status==='printing'||o.status==='ready').length;
+  const b=document.getElementById('activeBadge');
+  b.textContent=n; b.style.display=n>0?'flex':'none';
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function fullReset(){
+  ST.files=[]; ST.color='bw'; ST.size='a4'; ST.sides='single';
+  ST.bind='none'; ST.delivery='pickup'; ST.shop=null; ST.payment='upi';
+  ST.promoCode=''; ST.promoPercent=0; ST.orderId=null;
+  removeFile();
+  ['color','size','sides','bind'].forEach(g=>{
+    document.querySelectorAll('[data-group="'+g+'"]').forEach((c,i)=>c.classList.toggle('active',i===0));
+  });
+  document.querySelectorAll('.shop-card.selected').forEach(card=>card.classList.remove('selected'));
+  document.getElementById('shopBtn').disabled=true;
+  document.getElementById('callShopBtn').disabled=true;
+  selectPay('upi');
+  const pi=document.getElementById('promoInput'); if(pi)pi.value='';
+  const pm=document.getElementById('promoMsg'); if(pm)pm.textContent='';
+  const si=document.getElementById('specialInstr'); if(si)si.value='';
+  updatePrice();
+  goTo('s1');
+}
+
+// ══════════════════════════════════════════
+//  REAL-TIME: listen for shop-side changes
+// ══════════════════════════════════════════
+window.addEventListener('storage', function(e){
+  if(e.key !== DB.KEY) return;
+  if(!getSession()) return;
+  // Refresh badge and orders screen regardless
+  syncBadge();
+  // If tracking screen is active, sync the order status
+  if(ST.orderId && document.getElementById('s5').classList.contains('active')){
+    const o = DB.all().find(x=>x.id===ST.orderId);
+    if(!o) return;
+    if(o.status==='ready' && document.getElementById('trackBadge').textContent!=='Ready'){
+      markReady();
+    } else if(o.status==='collected' && document.getElementById('trackBadge').textContent!=='Done'){
+      markCollected();
+    }
+  }
+  // Refresh orders list if on orders screen
+  if(document.getElementById('orders').classList.contains('active')){
+    renderOrders();
+  }
+  // Refresh home recent
+  if(document.getElementById('s1').classList.contains('active')){
+    renderHomeRecent();
+  }
+});
+
+// Fallback polling every 4 seconds for same-tab or browser that blocks storage events
+let _lastPollHash = '';
+setInterval(function(){
+  if(!ST.orderId) return;
+  const orders = DB.all();
+  const hash = orders.map(o=>o.id+':'+o.status).join('|');
+  if(hash === _lastPollHash) return;
+  _lastPollHash = hash;
+  syncBadge();
+  if(document.getElementById('s5').classList.contains('active')){
+    const o = orders.find(x=>x.id===ST.orderId);
+    if(!o) return;
+    const badge = document.getElementById('trackBadge').textContent;
+    if(o.status==='ready' && badge!=='Ready'){
+      markReady();
+    } else if(o.status==='collected' && badge!=='Done'){
+      markCollected();
+    }
+  }
+  if(document.getElementById('orders').classList.contains('active')) renderOrders();
+  if(document.getElementById('s1').classList.contains('active')) renderHomeRecent();
+}, 4000);
+
+// ══════════════════════════════════════════
+//  AUTH INTEGRATION
+// ══════════════════════════════════════════
+const AUTH_KEYS={USERS:'neardoc_users',SHOPS:'neardoc_shops',SESSION:'neardoc_session'};
+
+function getSession(){
+  try{return JSON.parse(localStorage.getItem(AUTH_KEYS.SESSION)||'null')}catch{return null}
+}
+function getUsers(){
+  try{return JSON.parse(localStorage.getItem(AUTH_KEYS.USERS)||'[]')}catch{return[]}
+}
+function getCurrentUser(){
+  const s=getSession();
+  if(!s||s.role!=='user') return null;
+  return getUsers().find(u=>u.id===s.id)||null;
+}
+function getMyOrders(){
+  const user=getCurrentUser();
+  if(!user) return [];
+  return DB.all().filter(order=>order.userId===user.id);
+}
+function hashPwd(pwd){
+  let h=0;
+  for(let i=0;i<pwd.length;i++){h=((h<<5)-h)+pwd.charCodeAt(i);h|=0}
+  return 'h'+Math.abs(h).toString(16)+pwd.length;
+}
+
+// ── GUARD: redirect to auth if not logged in ──
+function checkAuth(){
+  const sess=getSession();
+  if(!sess || sess.role!=='user'){
+    document.getElementById('authGuard').style.display='flex';
+    document.querySelector('.topnav').style.display='none';
+    document.querySelector('.screens-outer').style.display='none';
+    return false;
+  }
+  // Wrong role (shop owner trying to access student app)
+  if(sess.role==='shop'){
+    localStorage.removeItem(AUTH_KEYS.SESSION);
+    document.getElementById('authGuard').style.display='flex';
+    document.querySelector('.topnav').style.display='none';
+    document.querySelector('.screens-outer').style.display='none';
+    return false;
+  }
+  return true;
+}
+
+// ── POPULATE NAV AVATAR & greeting ──
+function populateAuthUI(){
+  const user=getCurrentUser();
+  if(!user) return;
+  const initials=(user.fname||'?')[0].toUpperCase()+((user.lname||'')[0]||'').toUpperCase();
+  const avatar=document.getElementById('navAvatar');
+  if(avatar) avatar.textContent=initials;
+}
+
+// ── PROFILE MODAL ──
+function openProfile(){
+  const user=getCurrentUser();
+  if(!user) return;
+  const name=user.fname+' '+user.lname;
+  const initials=(user.fname[0]+user.lname[0]).toUpperCase();
+  document.getElementById('pAvatar').textContent=initials;
+  document.getElementById('pName').textContent=name;
+  document.getElementById('pEmail').textContent=user.email;
+  document.getElementById('pInfoName').textContent=name;
+  document.getElementById('pInfoEmail').textContent=user.email;
+  document.getElementById('pInfoPhone').textContent=user.phone||'Not set';
+  document.getElementById('pInfoCollege').textContent=user.college||'Not set';
+  document.getElementById('pInfoJoined').textContent=user.createdAt?new Date(user.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'—';
+  // Stats from orders
+  const myOrders=getMyOrders();
+  const active=myOrders.filter(o=>o.status==='printing'||o.status==='ready');
+  const done=myOrders.filter(o=>o.status==='collected');
+  const spent=myOrders.reduce((s,o)=>s+(o.price||0),0);
+  setText('pStatOrders',myOrders.length);
+  setText('pStatSpend','₹'+spent);
+  setText('pStatActive',active.length);
+  setText('pStatDone',done.length);
+  // Prefill edit tab
+  document.getElementById('peFirstName').value=user.fname||'';
+  document.getElementById('peLastName').value=user.lname||'';
+  document.getElementById('pePhone').value=user.phone||'';
+  document.getElementById('peCollege').value=user.college||'';
+  document.getElementById('peDeletePwd').value='';
+  // Reset to overview tab
+  switchPTab('overview',document.querySelector('.profile-tab'));
+  document.getElementById('profileOverlay').classList.add('open');
+}
+
+function closeProfile(){
+  document.getElementById('profileOverlay').classList.remove('open');
+}
+
+function switchPTab(tab, btn){
+  document.querySelectorAll('.profile-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.profile-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ptab-'+tab).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function saveProfile(){
+  const users=getUsers();
+  const sess=getSession();
+  const idx=users.findIndex(u=>u.id===sess.id);
+  if(idx<0){showToast('⚠️ User not found');return;}
+  const fname=document.getElementById('peFirstName').value.trim();
+  const lname=document.getElementById('peLastName').value.trim();
+  const phone=document.getElementById('pePhone').value.trim();
+  const college=document.getElementById('peCollege').value.trim();
+  if(!fname||!lname){showToast('⚠️ Name fields are required');return;}
+  users[idx]={...users[idx],fname,lname,phone,college};
+  localStorage.setItem(AUTH_KEYS.USERS,JSON.stringify(users));
+  populateAuthUI();
+  openProfile(); // refresh displayed data
+  showToast('✅ Profile updated');
+}
+
+function changePassword(){
+  const users=getUsers();
+  const sess=getSession();
+  const idx=users.findIndex(u=>u.id===sess.id);
+  if(idx<0) return;
+  const cur=document.getElementById('peCurPwd').value;
+  const nw=document.getElementById('peNewPwd').value;
+  const cfm=document.getElementById('peCfmPwd').value;
+  if(users[idx].pwd!==hashPwd(cur)){showToast('❌ Current password is incorrect');return;}
+  if(nw.length<6){showToast('⚠️ New password must be at least 6 characters');return;}
+  if(nw!==cfm){showToast('❌ Passwords do not match');return;}
+  users[idx].pwd=hashPwd(nw);
+  localStorage.setItem(AUTH_KEYS.USERS,JSON.stringify(users));
+  document.getElementById('peCurPwd').value='';
+  document.getElementById('peNewPwd').value='';
+  document.getElementById('peCfmPwd').value='';
+  showToast('✅ Password updated successfully');
+}
+
+function deleteUserAccount(){
+  const users=getUsers();
+  const sess=getSession();
+  const idx=users.findIndex(u=>u.id===sess?.id);
+  if(idx<0){showToast('⚠️ User not found');return;}
+  const pwd=document.getElementById('peDeletePwd').value;
+  if(users[idx].pwd!==hashPwd(pwd||'')){showToast('❌ Password is incorrect');return;}
+  const remainingOrders=DB.all().filter(order=>order.userId!==users[idx].id);
+  localStorage.setItem(DB.KEY,JSON.stringify(remainingOrders));
+  users.splice(idx,1);
+  localStorage.setItem(AUTH_KEYS.USERS,JSON.stringify(users));
+  localStorage.removeItem(AUTH_KEYS.SESSION);
+  showToast('🗑 Account deleted');
+  setTimeout(()=>window.location.href='./NearDoc-auth.html', 900);
+}
+
+function logoutUser(){
+  localStorage.removeItem(AUTH_KEYS.SESSION);
+  showToast('👋 Signed out');
+  setTimeout(()=>window.location.href='./NearDoc-auth.html', 900);
+}
+
+// ── GREETING on home hero ──
+function setHeroGreeting(){
+  const user=getCurrentUser();
+  if(!user) return;
+  const h=new Date().getHours();
+  const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const greetEl=document.querySelector('.hero-label');
+  if(greetEl) greetEl.textContent='👋 '+g+', '+user.fname+'!';
+}
+
+// INIT
+const _authOk = checkAuth();
+if(_authOk){
+  populateAuthUI();
+  setHeroGreeting();
+  renderShopCards();
+  updatePrice();
+  syncBadge();
+  renderHomeRecent();
+  document.getElementById('callShopBtn').disabled=true;
+}
+</script>
+</body>
+</html>
+
+
+

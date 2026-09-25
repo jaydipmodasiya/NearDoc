@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NearDoc Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#1859f0;--blue-soft:#e9f0ff;--ink:#101828;--ink-70:#475467;--ink-40:#98a2b3;--line:#e6eaf2;--bg:#f5f8ff;--card:#fff;--green:#0a8a5c;--green-bg:#e8f7f0;--amber:#b86a00;--amber-bg:#fff3df;--red:#cb3a31;--red-bg:#fdeceb;--radius:22px;--radius-sm:12px;--shadow:0 16px 40px rgba(16,24,40,.08);--t:.22s cubic-bezier(.4,0,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#eef3fb 100%);color:var(--ink);min-height:100vh}
+button,input{font:inherit}
+.wrap{max-width:1380px;margin:0 auto;padding:24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-family:'Fraunces',serif;font-size:30px;letter-spacing:-.8px}
+.brand span{color:var(--blue)}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
+.pill,.btn{border-radius:999px;padding:11px 16px;border:1px solid var(--line);background:var(--card)}
+.pill{color:var(--ink-70)}
+.btn{cursor:pointer;transition:var(--t)}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-ghost{color:var(--ink-70)}
+.grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.stat .label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-40);margin-bottom:10px}
+.stat .value{font-family:'Fraunces',serif;font-size:34px;letter-spacing:-1px}
+.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.panel h2{font-family:'Fraunces',serif;font-size:28px;font-weight:400;letter-spacing:-.6px;margin-bottom:6px}
+.sub{font-size:14px;color:var(--ink-70);margin-bottom:18px}
+.stack{display:grid;gap:12px}
+.card{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fcfdff}
+.row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.title{font-size:15px;font-weight:700}
+.meta{font-size:12px;color:var(--ink-70);margin-top:4px;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.badge.pending{background:var(--amber-bg);color:var(--amber)}
+.badge.verified{background:var(--green-bg);color:var(--green)}
+.badge.suspended{background:var(--red-bg);color:var(--red)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn-sm{padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer}
+.btn-sm.approve{background:var(--green);border-color:var(--green);color:#fff}
+.btn-sm.suspend{background:var(--amber);border-color:var(--amber);color:#fff}
+.btn-sm.delete{background:var(--red-bg);border-color:rgba(203,58,49,.2);color:var(--red)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px;vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-40)}
+tr:last-child td{border-bottom:none}
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login-card{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:28px;padding:28px;box-shadow:var(--shadow)}
+.login-card h1{font-family:'Fraunces',serif;font-size:34px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-40);margin-bottom:6px}
+.field input{width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);outline:none}
+.field input:focus{border-color:var(--blue)}
+.hint{font-size:13px;color:var(--ink-70);line-height:1.6}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;transition:transform .28s;box-shadow:var(--shadow);z-index:50}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:980px){.grid-stats{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}}
+@media(max-width:620px){.grid-stats{grid-template-columns:1fr}.top-actions{width:100%}.top-actions .btn,.top-actions .pill{width:100%;text-align:center}}
+</style>
+</head>
+<body>
+<div id="adminLogin" class="login-shell">
+  <div class="login-card">
+    <h1>Admin panel</h1>
+    <p class="hint" style="margin-bottom:18px">Manage shop verification, suspend or remove shops, review platform users, and monitor recent orders.</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="adminEmail" placeholder="admin@neardoc.local">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="adminPwd" placeholder="admin123">
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">Sign in</button>
+    <p class="hint" style="margin-top:16px">Default admin login: admin@neardoc.local / admin123</p>
+  </div>
+</div>
+
+<div id="adminApp" style="display:none">
+  <div class="wrap">
+    <div class="top">
+      <div class="brand"><span>Near</span>Doc Admin</div>
+      <div class="top-actions">
+        <a class="btn btn-ghost" href="./NearDoc-auth.html" style="text-decoration:none">Auth</a>
+        <a class="btn btn-ghost" href="./NearDoc.html" style="text-decoration:none">Student app</a>
+        <a class="btn btn-ghost" href="./NearDoc-shop.html" style="text-decoration:none">Shop dashboard</a>
+        <button class="btn btn-primary" onclick="renderAdmin()">Refresh</button>
+        <button class="btn btn-ghost" onclick="adminLogout()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="grid-stats">
+      <div class="stat"><div class="label">Registered users</div><div class="value" id="stUsers">0</div></div>
+      <div class="stat"><div class="label">Registered shops</div><div class="value" id="stShops">0</div></div>
+      <div class="stat"><div class="label">Pending shops</div><div class="value" id="stPending">0</div></div>
+      <div class="stat"><div class="label">Live orders</div><div class="value" id="stLive">0</div></div>
+    </div>
+
+    <div class="layout">
+      <div class="stack">
+        <div class="panel">
+          <h2>Pending verification</h2>
+          <p class="sub">Approve shops here to make them visible in the customer app.</p>
+          <div id="pendingList" class="stack"></div>
+        </div>
+        <div class="panel">
+          <h2>All shops</h2>
+          <p class="sub">Review verification status, contact details, and admin actions.</p>
+          <div id="shopTableWrap"></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="panel">
+          <h2>Users</h2>
+          <p class="sub">Current student accounts stored in NearDoc.</p>
+          <div id="userTableWrap"></div>
+        </div>
+        <div class="panel">
+          <h2>Recent orders</h2>
+          <p class="sub">Latest print jobs across the platform.</p>
+          <div id="orderTableWrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_SESSION_KEY='neardoc_admin_session';
+const ADMIN_EMAIL='admin@neardoc.local';
+const ADMIN_PASSWORD='admin123';
+const KEYS={USERS:'neardoc_users',SHOPS:'neardoc_shops',ORDERS:'neardoc_v2'};
+
+function readJson(key){
+  try{return JSON.parse(localStorage.getItem(key)||'[]')}catch{return[]}
+}
+function writeJson(key,data){
+  localStorage.setItem(key,JSON.stringify(data));
+}
+function readUsers(){ return readJson(KEYS.USERS); }
+function readShops(){ return readJson(KEYS.SHOPS); }
+function readOrders(){ return readJson(KEYS.ORDERS); }
+function money(n){ return '₹'+(Number(n)||0); }
+function formatDate(ts){
+  if(!ts) return '—';
+  const d=new Date(ts);
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+function escapeHtml(value){
+  return String(value)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+function adminLogin(){
+  const email=document.getElementById('adminEmail').value.trim().toLowerCase();
+  const pwd=document.getElementById('adminPwd').value;
+  if(email!==ADMIN_EMAIL || pwd!==ADMIN_PASSWORD){
+    toast('Incorrect admin email or password');
+    return;
+  }
+  localStorage.setItem(ADMIN_SESSION_KEY,JSON.stringify({email,ts:Date.now()}));
+  bootAdmin();
+}
+function adminLogout(){
+  localStorage.removeItem(ADMIN_SESSION_KEY);
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('adminLogin').style.display='grid';
+}
+function hasAdminSession(){
+  try{return !!JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY)||'null')}catch{return false}
+}
+function setShopStatus(id,status){
+  const shops=readShops();
+  const idx=shops.findIndex(shop=>String(shop.id)===String(id));
+  if(idx<0) return;
+  shops[idx].status=status;
+  writeJson(KEYS.SHOPS,shops);
+  toast('Shop status updated to '+status);
+  renderAdmin();
+}
+function deleteShopAdmin(id){
+  const shops=readShops().filter(shop=>String(shop.id)!==String(id));
+  const orders=readOrders().filter(order=>String(order.shop)!==String(id));
+  writeJson(KEYS.SHOPS,shops);
+  writeJson(KEYS.ORDERS,orders);
+  toast('Shop and linked orders deleted');
+  renderAdmin();
+}
+function deleteUserAdmin(id){
+  const users=readUsers().filter(user=>String(user.id)!==String(id));
+  const orders=readOrders().filter(order=>String(order.userId)!==String(id));
+  writeJson(KEYS.USERS,users);
+  writeJson(KEYS.ORDERS,orders);
+  toast('User and linked orders deleted');
+  renderAdmin();
+}
+function renderPending(shops){
+  const pending=shops.filter(shop=>shop.status==='pending');
+  const wrap=document.getElementById('pendingList');
+  if(!pending.length){
+    wrap.innerHTML='<div class="card"><div class="title">No pending shops</div><div class="meta">Everything is already reviewed.</div></div>';
+    return;
+  }
+  wrap.innerHTML=pending.map(shop=>`
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="title">${escapeHtml(shop.name||'Unnamed shop')}</div>
+          <div class="meta">${escapeHtml(shop.ownerName||'-')} · ${escapeHtml(shop.email||'-')}<br>${escapeHtml(shop.campus||shop.address||'-')}</div>
+        </div>
+        <span class="badge pending">Pending</span>
+      </div>
+      <div class="actions">
+        <button class="btn-sm approve" onclick="setShopStatus('${shop.id}','verified')">Approve</button>
+        <button class="btn-sm suspend" onclick="setShopStatus('${shop.id}','suspended')">Suspend</button>
+        <button class="btn-sm delete" onclick="deleteShopAdmin('${shop.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+function renderShopTable(shops){
+  const wrap=document.getElementById('shopTableWrap');
+  if(!shops.length){
+    wrap.innerHTML='<div class="card"><div class="title">No registered shops</div></div>';
+    return;
+  }
+  wrap.innerHTML=`<table>
+    <thead><tr><th>Shop</th><th>Status</th><th>Pricing</th><th>Actions</th></tr></thead>
+    <tbody>${shops.map(shop=>`
+      <tr>
+        <td><strong>${escapeHtml(shop.name||'-')}</strong><br><span style="color:var(--ink-70);font-size:12px">${escapeHtml(shop.email||'-')} · ${escapeHtml(shop.phone||'-')}</span></td>
+        <td><span class="badge ${escapeHtml(shop.status||'pending')}">${escapeHtml((shop.status||'pending').toUpperCase())}</span></td>
+        <td>B&W ${money(shop.priceBw||2)} / Color ${money(shop.priceClr||8)}</td>
+        <td>
+          <div class="actions">
+            <button class="btn-sm approve" onclick="setShopStatus('${shop.id}','verified')">Approve</button>
+            <button class="btn-sm suspend" onclick="setShopStatus('${shop.id}','suspended')">Suspend</button>
+            <button class="btn-sm delete" onclick="deleteShopAdmin('${shop.id}')">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+function renderUserTable(users){
+  const wrap=document.getElementById('userTableWrap');
+  if(!users.length){
+    wrap.innerHTML='<div class="card"><div class="title">No users found</div></div>';
+    return;
+  }
+  wrap.innerHTML=`<table>
+    <thead><tr><th>User</th><th>College</th><th>Joined</th><th>Action</th></tr></thead>
+    <tbody>${users.map(user=>`
+      <tr>
+        <td><strong>${escapeHtml((user.fname||'')+' '+(user.lname||''))}</strong><br><span style="color:var(--ink-70);font-size:12px">${escapeHtml(user.email||'-')}</span></td>
+        <td>${escapeHtml(user.college||'-')}</td>
+        <td>${escapeHtml(formatDate(user.createdAt))}</td>
+        <td><button class="btn-sm delete" onclick="deleteUserAdmin('${user.id}')">Delete</button></td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+function renderOrderTable(orders){
+  const wrap=document.getElementById('orderTableWrap');
+  if(!orders.length){
+    wrap.innerHTML='<div class="card"><div class="title">No orders yet</div></div>';
+    return;
+  }
+  wrap.innerHTML=`<table>
+    <thead><tr><th>Order</th><th>Shop</th><th>Status</th><th>Total</th></tr></thead>
+    <tbody>${orders.slice(0,12).map(order=>`
+      <tr>
+        <td><strong>${escapeHtml(order.id||'-')}</strong><br><span style="color:var(--ink-70);font-size:12px">${escapeHtml(order.doc||'-')}</span></td>
+        <td>${escapeHtml(order.shopName||'-')}</td>
+        <td>${escapeHtml(order.status||'-')}</td>
+        <td>${money(order.price)}</td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+function renderAdmin(){
+  const users=readUsers();
+  const shops=readShops().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const orders=readOrders().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const live=orders.filter(order=>order.status==='printing'||order.status==='ready');
+  document.getElementById('stUsers').textContent=users.length;
+  document.getElementById('stShops').textContent=shops.length;
+  document.getElementById('stPending').textContent=shops.filter(shop=>shop.status==='pending').length;
+  document.getElementById('stLive').textContent=live.length;
+  renderPending(shops);
+  renderShopTable(shops);
+  renderUserTable(users);
+  renderOrderTable(orders);
+}
+function bootAdmin(){
+  document.getElementById('adminLogin').style.display='none';
+  document.getElementById('adminApp').style.display='block';
+  renderAdmin();
+}
+window.addEventListener('storage',renderAdmin);
+if(hasAdminSession()) bootAdmin();
+</script>
+</body>
+</html>

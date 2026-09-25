@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NearDoc </title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1a6ef5;--blue-light:#e8f0fe;--blue-mid:#4a90f5;--blue-deep:#0f4ec4;
+  --ink:#0d0d0d;--ink-60:#555;--ink-30:#aaa;--ink-10:#f0f0f0;
+  --surface:#fff;--surface-2:#f7f8fc;--surface-3:#eef1f8;
+  --green:#0a8a5c;--green-bg:#e6f6f0;
+  --amber:#c47800;--amber-bg:#fff4e0;
+  --red:#d43a3a;--red-bg:#fdeaea;
+  --radius:14px;--radius-sm:8px;--radius-lg:20px;
+  --shadow:0 2px 16px rgba(0,0,0,0.08);--shadow-lg:0 12px 48px rgba(0,0,0,0.14);
+  --t:0.22s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--surface-2);color:var(--ink);min-height:100vh;overflow-x:hidden}
+
+/* ── LAYOUT ── */
+.auth-root{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+@media(max-width:860px){.auth-root{grid-template-columns:1fr}}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  background:linear-gradient(150deg,#0a0f1e 0%,#0d1b3e 50%,#112266 100%);
+  padding:clamp(32px,6vw,64px);
+  display:flex;flex-direction:column;justify-content:space-between;
+  position:relative;overflow:hidden;min-height:100vh;
+}
+.left-panel::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 20% 80%,rgba(26,110,245,0.35) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 40% at 90% 10%,rgba(74,144,245,0.2) 0%,transparent 60%);
+  pointer-events:none;
+}
+.left-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;
+}
+.left-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0}
+.logo{font-family:'Fraunces',serif;font-size:28px;font-weight:400;color:#fff;letter-spacing:-0.5px;margin-bottom:clamp(40px,6vh,80px);position:relative;z-index:1}
+.logo span{color:#7eb3ff}
+.left-heading{font-family:'Fraunces',serif;font-size:clamp(32px,4vw,52px);font-weight:300;color:#fff;line-height:1.06;letter-spacing:-1.5px;margin-bottom:18px}
+.left-heading em{font-style:italic;color:#7eb3ff}
+.left-sub{font-size:15px;color:rgba(255,255,255,0.5);line-height:1.7;font-weight:300;max-width:380px;margin-bottom:40px}
+.feat-list{display:flex;flex-direction:column;gap:14px}
+.feat{display:flex;align-items:center;gap:12px}
+.feat-dot{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.feat-text{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.5}
+.feat-text strong{color:rgba(255,255,255,0.9);font-weight:500}
+.left-footer{position:relative;z-index:1;font-size:12px;color:rgba(255,255,255,0.3)}
+@media(max-width:860px){.left-panel{min-height:auto;padding:32px 24px 40px}}
+
+/* ── RIGHT PANEL ── */
+.right-panel{
+  background:var(--surface);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:clamp(24px,5vw,64px) clamp(20px,4vw,56px);
+  min-height:100vh;overflow-y:auto;
+}
+@media(max-width:860px){.right-panel{min-height:auto;padding:32px 20px 48px}}
+
+.auth-box{width:100%;max-width:420px}
+.auth-title{font-family:'Fraunces',serif;font-size:clamp(26px,4vw,36px);font-weight:400;color:var(--ink);letter-spacing:-0.8px;margin-bottom:6px}
+.auth-sub{font-size:14px;color:var(--ink-60);margin-bottom:32px;line-height:1.5}
+
+/* ── ROLE TABS ── */
+.role-tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--surface-3);border-radius:var(--radius);padding:4px;margin-bottom:28px}
+.role-tab{padding:10px 16px;border:none;background:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t);text-align:center;display:flex;align-items:center;justify-content:center;gap:7px}
+.role-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 8px rgba(0,0,0,0.1)}
+.role-tab-icon{font-size:16px}
+
+/* ── AUTH TOGGLE ── */
+.auth-toggle{display:flex;gap:0;background:var(--surface-3);border-radius:var(--radius);padding:4px;margin-bottom:28px}
+.auth-toggle-btn{flex:1;padding:9px 14px;border:none;background:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t)}
+.auth-toggle-btn.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 8px rgba(0,0,0,0.1)}
+
+/* ── FORM FIELDS ── */
+.field{margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+@media(max-width:440px){.field-row{grid-template-columns:1fr}}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-60);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--surface-2);
+  outline:none;transition:var(--t);appearance:none;-webkit-appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(26,110,245,0.1)}
+.field input.error,.field select.error{border-color:var(--red);background:var(--red-bg)}
+.field-err{font-size:12px;color:var(--red);margin-top:5px;display:none}
+.field-err.show{display:block}
+.field textarea{resize:vertical;min-height:80px}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.pwd-wrap{position:relative}
+.pwd-wrap input{padding-right:44px}
+.pwd-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-30);font-size:16px;padding:4px;line-height:1;transition:var(--t)}
+.pwd-toggle:hover{color:var(--ink-60)}
+
+/* ── INPUT HINTS ── */
+.input-hint{font-size:11px;color:var(--ink-30);margin-top:4px}
+
+/* ── PASSWORD STRENGTH ── */
+.pwd-strength{margin-top:8px}
+.pwd-bar{height:3px;background:var(--ink-10);border-radius:99px;overflow:hidden;margin-bottom:4px}
+.pwd-bar-fill{height:100%;border-radius:99px;transition:width .3s,background .3s}
+.pwd-label{font-size:11px;color:var(--ink-30)}
+
+/* ── DIVIDER ── */
+.or-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink-30);font-size:12px}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:rgba(0,0,0,0.08)}
+
+/* ── BUTTONS ── */
+.btn-main{
+  width:100%;padding:14px 24px;background:var(--blue);color:#fff;border:none;
+  border-radius:99px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+  cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:8px;
+}
+.btn-main:hover{background:var(--blue-deep);transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,110,245,0.32)}
+.btn-main:active{transform:scale(0.98)}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-main.green{background:var(--green)}.btn-main.green:hover{background:#077a4f}
+.btn-outline{
+  width:100%;padding:12px 24px;background:none;color:var(--ink-60);
+  border:1.5px solid rgba(0,0,0,0.1);border-radius:99px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
+  cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:8px;
+}
+.btn-outline:hover{border-color:var(--ink);color:var(--ink);background:var(--surface-3)}
+
+/* ── TERMS CHECKBOX ── */
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;margin:16px 0}
+.checkbox-row input[type=checkbox]{width:16px;height:16px;border-radius:4px;cursor:pointer;flex-shrink:0;margin-top:2px;accent-color:var(--blue)}
+.checkbox-row label{font-size:13px;color:var(--ink-60);line-height:1.5;cursor:pointer}
+.checkbox-row label a{color:var(--blue);text-decoration:none}
+.checkbox-row label a:hover{text-decoration:underline}
+
+/* ── STEP INDICATOR (shop register) ── */
+.steps-bar{display:flex;align-items:center;gap:0;margin-bottom:28px}
+.step-item{display:flex;align-items:center;gap:8px;flex:1}
+.step-item:last-child{flex:none}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--ink-30);flex-shrink:0;transition:var(--t)}
+.step-num.active{border-color:var(--blue);background:var(--blue);color:#fff}
+.step-num.done{border-color:var(--green);background:var(--green);color:#fff}
+.step-label{font-size:11px;color:var(--ink-30);font-weight:500;white-space:nowrap}
+.step-label.active{color:var(--ink)}
+.step-line{flex:1;height:1px;background:rgba(0,0,0,0.08);margin:0 8px}
+.step-line.done{background:var(--green)}
+
+/* ── SECTION HEADER ── */
+.section-head{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:8px}
+.section-head span{font-size:16px}
+
+/* ── UPLOAD AVATAR ── */
+.avatar-upload{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.avatar-preview{width:64px;height:64px;border-radius:50%;background:var(--blue-light);border:2px solid rgba(26,110,245,0.2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden}
+.avatar-preview img{width:100%;height:100%;object-fit:cover}
+.avatar-info{flex:1}
+.avatar-info p{font-size:13px;color:var(--ink-60);margin-bottom:8px;line-height:1.4}
+.avatar-btn{padding:7px 14px;background:none;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:var(--t);color:var(--ink-60)}
+.avatar-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* ── OPEN HOURS GRID ── */
+.hours-grid{display:grid;gap:8px}
+.hours-row{display:grid;grid-template-columns:80px 1fr 1fr 36px;align-items:center;gap:8px;font-size:13px}
+.hours-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+.hours-day{font-weight:500;color:var(--ink);font-size:13px}
+.hours-time{padding:8px 10px;border:1.5px solid rgba(0,0,0,0.1);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);outline:none;transition:var(--t);width:100%}
+.hours-time:focus{border-color:var(--blue)}
+.hours-time:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:400px){.hours-row{grid-template-columns:60px 1fr 1fr 32px;gap:6px}}
+
+/* ── SERVICES CHIPS ── */
+.services-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.svc-chip{padding:7px 13px;border-radius:99px;border:1.5px solid rgba(0,0,0,0.1);background:var(--surface);font-size:12px;font-weight:500;color:var(--ink-60);cursor:pointer;transition:var(--t)}
+.svc-chip:hover{border-color:var(--blue);color:var(--blue)}
+.svc-chip.active{border-color:var(--blue);background:var(--blue);color:#fff}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:99px;font-size:14px;font-weight:500;z-index:9999;transition:transform .38s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.25);max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── SUCCESS CARD ── */
+.success-card{text-align:center;padding:32px 20px;display:none}
+.success-icon{width:72px;height:72px;border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.success-icon.blue{background:var(--blue-light)}
+.success-icon.green{background:var(--green-bg)}
+.success-title{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:var(--ink);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--ink-60);line-height:1.6;margin-bottom:24px}
+.success-detail{background:var(--surface-2);border-radius:var(--radius-sm);padding:14px 16px;text-align:left;margin-bottom:20px;font-size:13px}
+.success-detail-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.success-detail-row:last-child{border:none;font-weight:600}
+
+/* ── MISC ── */
+.link{color:var(--blue);cursor:pointer;font-weight:500;text-decoration:none;transition:var(--t)}
+.link:hover{text-decoration:underline}
+.switch-text{text-align:center;font-size:13px;color:var(--ink-60);margin-top:20px}
+.form-section{display:none}.form-section.active{display:block}
+.badge-pending{display:inline-flex;align-items:center;gap:5px;background:var(--amber-bg);color:var(--amber);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600}
+::selection{background:var(--blue);color:#fff}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<div class="auth-root">
+
+  <!-- ══════════════ LEFT PANEL ══════════════ -->
+  <div class="left-panel">
+    <div class="left-grid"></div>
+    <div class="logo" id="leftLogo"><span>Near</span>Doc</div>
+    <div class="left-content" id="leftContent">
+      <!-- Content swaps based on selected role -->
+    </div>
+    <div class="left-footer">© 2025 NearDoc · Campus Printing Platform</div>
+  </div>
+
+  <!-- ══════════════ RIGHT PANEL ══════════════ -->
+  <div class="right-panel">
+    <div class="auth-box">
+
+      <!-- ROLE SELECTOR -->
+      <div id="roleSelector">
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in to your account or create a new one</div>
+        <div class="role-tabs" id="roleTabs">
+          <button class="role-tab active" id="roleUser" onclick="setRole('user')">
+            <span class="role-tab-icon">🎓</span> Student
+          </button>
+          <button class="role-tab" id="roleShop" onclick="setRole('shop')">
+            <span class="role-tab-icon">🖨️</span> Shop Owner
+          </button>
+        </div>
+      </div>
+
+      <!-- AUTH TOGGLE (Login / Register) -->
+      <div class="auth-toggle" id="authToggle">
+        <button class="auth-toggle-btn active" id="btnLogin" onclick="setMode('login')">Sign in</button>
+        <button class="auth-toggle-btn" id="btnRegister" onclick="setMode('register')">Create account</button>
+      </div>
+
+      <!-- ════ USER LOGIN ════ -->
+      <div class="form-section active" id="secUserLogin">
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="ulEmail" placeholder="you@university.edu" autocomplete="email">
+          <div class="field-err" id="ulEmailErr">Please enter a valid email</div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="pwd-wrap">
+            <input type="password" id="ulPwd" placeholder="Your password" autocomplete="current-password">
+            <button class="pwd-toggle" onclick="togglePwd('ulPwd',this)" tabindex="-1">👁</button>
+          </div>
+          <div class="field-err" id="ulPwdErr">Password is required</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+          <span class="link" onclick="showForgot()" style="font-size:13px">Forgot password?</span>
+        </div>
+        <button class="btn-main" onclick="loginUser()">
+          Sign in <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+        </button>
+        <div class="switch-text">Don't have an account? <span class="link" onclick="setMode('register')">Create one</span></div>
+      </div>
+
+      <!-- ════ USER REGISTER ════ -->
+      <div class="form-section" id="secUserRegister">
+        <div class="field-row">
+          <div class="field">
+            <label>First name</label>
+            <input type="text" id="urFname" placeholder="Rahul" autocomplete="given-name">
+            <div class="field-err" id="urFnameErr">Required</div>
+          </div>
+          <div class="field">
+            <label>Last name</label>
+            <input type="text" id="urLname" placeholder="Sharma" autocomplete="family-name">
+            <div class="field-err" id="urLnameErr">Required</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>University email</label>
+          <input type="email" id="urEmail" placeholder="rahul@university.edu" autocomplete="email">
+          <div class="field-err" id="urEmailErr">Enter a valid email address</div>
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <input type="tel" id="urPhone" placeholder="+91 98765 43210" autocomplete="tel">
+          <div class="field-err" id="urPhoneErr">Enter a valid phone number</div>
+        </div>
+        <div class="field">
+          <label>College / University</label>
+          <input type="text" id="urCollege" placeholder="IIT Delhi, DU, BITS Pilani…">
+          <div class="field-err" id="urCollegeErr">Required</div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="pwd-wrap">
+            <input type="password" id="urPwd" placeholder="Create a strong password" oninput="checkPwdStrength(this,'urPwdStrength')" autocomplete="new-password">
+            <button class="pwd-toggle" onclick="togglePwd('urPwd',this)" tabindex="-1">👁</button>
+          </div>
+          <div class="pwd-strength" id="urPwdStrength" style="display:none">
+            <div class="pwd-bar"><div class="pwd-bar-fill" id="urPwdBar"></div></div>
+            <div class="pwd-label" id="urPwdLabel"></div>
+          </div>
+          <div class="field-err" id="urPwdErr">Password must be at least 6 characters</div>
+        </div>
+        <div class="field">
+          <label>Confirm password</label>
+          <div class="pwd-wrap">
+            <input type="password" id="urPwd2" placeholder="Repeat password" autocomplete="new-password">
+            <button class="pwd-toggle" onclick="togglePwd('urPwd2',this)" tabindex="-1">👁</button>
+          </div>
+          <div class="field-err" id="urPwd2Err">Passwords do not match</div>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="urTerms">
+          <label for="urTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+        </div>
+        <div class="field-err" id="urTermsErr" style="margin-top:-10px">You must agree to the terms</div>
+        <button class="btn-main" onclick="registerUser()">
+          Create account <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+        </button>
+        <div class="switch-text">Already have an account? <span class="link" onclick="setMode('login')">Sign in</span></div>
+      </div>
+
+      <!-- ════ SHOP LOGIN ════ -->
+      <div class="form-section" id="secShopLogin">
+        <div class="field">
+          <label>Shop email</label>
+          <input type="email" id="slEmail" placeholder="shop@example.com" autocomplete="email">
+          <div class="field-err" id="slEmailErr">Please enter a valid email</div>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <div class="pwd-wrap">
+            <input type="password" id="slPwd" placeholder="Your password" autocomplete="current-password">
+            <button class="pwd-toggle" onclick="togglePwd('slPwd',this)" tabindex="-1">👁</button>
+          </div>
+          <div class="field-err" id="slPwdErr">Password is required</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+          <span class="link" onclick="showForgot()" style="font-size:13px">Forgot password?</span>
+        </div>
+        <button class="btn-main green" onclick="loginShop()">
+          Open dashboard <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+        </button>
+        <div class="switch-text">New shop? <span class="link" onclick="setMode('register')">Register your shop</span></div>
+      </div>
+
+      <!-- ════ SHOP REGISTER (multi-step) ════ -->
+      <div class="form-section" id="secShopRegister">
+        <!-- Step bar -->
+        <div class="steps-bar" id="shopStepsBar">
+          <div class="step-item">
+            <div class="step-num active" id="snum0">1</div>
+            <div class="step-label active" id="slbl0">Account</div>
+          </div>
+          <div class="step-line" id="sline0"></div>
+          <div class="step-item">
+            <div class="step-num" id="snum1">2</div>
+            <div class="step-label" id="slbl1">Shop info</div>
+          </div>
+          <div class="step-line" id="sline1"></div>
+          <div class="step-item">
+            <div class="step-num" id="snum2">3</div>
+            <div class="step-label" id="slbl2">Services</div>
+          </div>
+          <div class="step-line" id="sline2"></div>
+          <div class="step-item">
+            <div class="step-num" id="snum3">4</div>
+            <div class="step-label" id="slbl3">Hours</div>
+          </div>
+        </div>
+
+        <!-- Step 0: Account credentials -->
+        <div id="shopStep0">
+          <div class="section-head"><span>👤</span> Account credentials</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Owner first name</label>
+              <input type="text" id="srFname" placeholder="Suresh">
+              <div class="field-err" id="srFnameErr">Required</div>
+            </div>
+            <div class="field">
+              <label>Last name</label>
+              <input type="text" id="srLname" placeholder="Kumar">
+              <div class="field-err" id="srLnameErr">Required</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Business email</label>
+            <input type="email" id="srEmail" placeholder="owner@quickprint.com" autocomplete="email">
+            <div class="field-err" id="srEmailErr">Enter a valid email</div>
+          </div>
+          <div class="field">
+            <label>Phone / WhatsApp</label>
+            <input type="tel" id="srPhone" placeholder="+91 98765 43210">
+            <div class="field-err" id="srPhoneErr">Enter a valid phone number</div>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <div class="pwd-wrap">
+              <input type="password" id="srPwd" placeholder="Create a strong password" oninput="checkPwdStrength(this,'srPwdStrength')" autocomplete="new-password">
+              <button class="pwd-toggle" onclick="togglePwd('srPwd',this)" tabindex="-1">👁</button>
+            </div>
+            <div class="pwd-strength" id="srPwdStrength" style="display:none">
+              <div class="pwd-bar"><div class="pwd-bar-fill" id="srPwdBar"></div></div>
+              <div class="pwd-label" id="srPwdLabel"></div>
+            </div>
+            <div class="field-err" id="srPwdErr">Password must be at least 6 characters</div>
+          </div>
+          <div class="field">
+            <label>Confirm password</label>
+            <div class="pwd-wrap">
+              <input type="password" id="srPwd2" placeholder="Repeat password" autocomplete="new-password">
+              <button class="pwd-toggle" onclick="togglePwd('srPwd2',this)" tabindex="-1">👁</button>
+            </div>
+            <div class="field-err" id="srPwd2Err">Passwords do not match</div>
+          </div>
+          <button class="btn-main green" onclick="shopNext(0)">Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+          <div class="switch-text">Already registered? <span class="link" onclick="setMode('login')">Sign in</span></div>
+        </div>
+
+        <!-- Step 1: Shop info -->
+        <div id="shopStep1" style="display:none">
+          <div class="section-head"><span>🏪</span> Shop details</div>
+          <div class="avatar-upload">
+            <div class="avatar-preview" id="shopAvatarPreview">🖨️</div>
+            <div class="avatar-info">
+              <p>Upload your shop logo or storefront photo</p>
+              <input type="file" id="shopLogoInput" accept="image/*" onchange="previewLogo(this)">
+              <button class="avatar-btn" onclick="document.getElementById('shopLogoInput').click()">Upload photo</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Shop name</label>
+            <input type="text" id="srShopName" placeholder="QuickPrint Hub">
+            <div class="field-err" id="srShopNameErr">Shop name is required</div>
+          </div>
+          <div class="field">
+            <label>Shop tagline</label>
+            <input type="text" id="srTagline" placeholder="Fast, affordable campus printing">
+            <div class="input-hint">One line that describes your shop</div>
+          </div>
+          <div class="field">
+            <label>Full address</label>
+            <input type="text" id="srAddress" placeholder="Shop 12, Main Gate Road, Near Library">
+            <div class="field-err" id="srAddressErr">Address is required</div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Campus / Area</label>
+              <input type="text" id="srCampus" placeholder="IIT Delhi, Karol Bagh…">
+              <div class="field-err" id="srCampusErr">Required</div>
+            </div>
+            <div class="field">
+              <label>PIN code</label>
+              <input type="text" id="srPin" placeholder="110016" maxlength="6" inputmode="numeric">
+              <div class="field-err" id="srPinErr">Enter valid 6-digit PIN</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Google Maps link (optional)</label>
+            <input type="url" id="srMaps" placeholder="https://maps.google.com/...">
+          </div>
+          <div class="field">
+            <label>Number of printers</label>
+            <select id="srPrinters">
+              <option value="1">1 printer</option>
+              <option value="2" selected>2 printers</option>
+              <option value="3">3 printers</option>
+              <option value="4">4 printers</option>
+              <option value="5+">5+ printers</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <button class="btn-outline" onclick="shopBack(1)" style="flex:none;width:auto;padding:12px 20px">← Back</button>
+            <button class="btn-main green" onclick="shopNext(1)" style="flex:1">Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+          </div>
+        </div>
+
+        <!-- Step 2: Services & pricing -->
+        <div id="shopStep2" style="display:none">
+          <div class="section-head"><span>⚙️</span> Services & pricing</div>
+          <div class="field">
+            <label>Print types offered</label>
+            <div class="services-grid" id="svcGrid">
+              <div class="svc-chip active" data-svc="bw" onclick="toggleSvc(this)">B&W printing</div>
+              <div class="svc-chip active" data-svc="color" onclick="toggleSvc(this)">Color printing</div>
+              <div class="svc-chip" data-svc="scan" onclick="toggleSvc(this)">Scanning</div>
+              <div class="svc-chip" data-svc="photocopy" onclick="toggleSvc(this)">Photocopy</div>
+              <div class="svc-chip" data-svc="binding" onclick="toggleSvc(this)">Binding</div>
+              <div class="svc-chip" data-svc="lamination" onclick="toggleSvc(this)">Lamination</div>
+              <div class="svc-chip" data-svc="a3" onclick="toggleSvc(this)">A3 printing</div>
+              <div class="svc-chip" data-svc="passport" onclick="toggleSvc(this)">Passport photos</div>
+              <div class="svc-chip" data-svc="banner" onclick="toggleSvc(this)">Banners / Flex</div>
+            </div>
+            <div class="field-err" id="svcErr">Select at least one service</div>
+          </div>
+          <div class="section-head" style="margin-top:20px"><span>💰</span> Base pricing per page</div>
+          <div class="field-row">
+            <div class="field">
+              <label>B&W (₹ per page)</label>
+              <input type="number" id="srPriceBw" placeholder="2" value="2" min="1" max="20">
+              <div class="input-hint">Standard is ₹2</div>
+            </div>
+            <div class="field">
+              <label>Color (₹ per page)</label>
+              <input type="number" id="srPriceClr" placeholder="8" value="8" min="3" max="50">
+              <div class="input-hint">Standard is ₹8</div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Avg. turnaround time</label>
+              <select id="srEta">
+                <option value="5 min">~5 minutes</option>
+                <option value="8-10 min" selected>8–10 minutes</option>
+                <option value="15 min">~15 minutes</option>
+                <option value="20 min">~20 minutes</option>
+                <option value="30 min">~30 minutes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Max orders per hour</label>
+              <select id="srCapacity">
+                <option value="5">5 orders/hr</option>
+                <option value="10" selected>10 orders/hr</option>
+                <option value="15">15 orders/hr</option>
+                <option value="20">20 orders/hr</option>
+                <option value="unlimited">Unlimited</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>About your shop (optional)</label>
+            <textarea id="srAbout" placeholder="Tell students what makes your shop great — equipment, specialties, discounts for bulk orders…"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <button class="btn-outline" onclick="shopBack(2)" style="flex:none;width:auto;padding:12px 20px">← Back</button>
+            <button class="btn-main green" onclick="shopNext(2)" style="flex:1">Continue <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+          </div>
+        </div>
+
+        <!-- Step 3: Opening hours -->
+        <div id="shopStep3" style="display:none">
+          <div class="section-head"><span>🕐</span> Opening hours</div>
+          <div class="hours-grid" id="hoursGrid">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="field" style="margin-top:16px">
+            <label>Holiday / closure notice (optional)</label>
+            <input type="text" id="srHoliday" placeholder="Closed on national holidays and Sundays">
+          </div>
+          <div style="margin-top:8px">
+            <div class="checkbox-row">
+              <input type="checkbox" id="srTerms">
+              <label for="srTerms">I agree to NearDoc's <a href="#">Shop Partner Terms</a> and confirm all information is accurate</label>
+            </div>
+            <div class="field-err" id="srTermsErr">You must agree to continue</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <button class="btn-outline" onclick="shopBack(3)" style="flex:none;width:auto;padding:12px 20px">← Back</button>
+            <button class="btn-main green" onclick="registerShop()" style="flex:1">Register shop <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg></button>
+          </div>
+          <div class="switch-text">Already registered? <span class="link" onclick="setMode('login')">Sign in</span></div>
+        </div>
+      </div>
+
+      <!-- ════ SUCCESS STATES ════ -->
+      <div class="success-card" id="successUser">
+        <div class="success-icon blue">🎓</div>
+        <div class="success-title">Welcome aboard!</div>
+        <div class="success-sub" id="suUserSub">Your account is ready. You can now upload documents and place print orders at nearby shops.</div>
+        <div class="success-detail" id="suUserDetail"></div>
+        <button class="btn-main" onclick="launchApp('user')">Open NearDoc app <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+      </div>
+
+      <div class="success-card" id="successShop">
+        <div class="success-icon green">🖨️</div>
+        <div class="success-title">Shop registered!</div>
+        <div class="success-sub">Your shop account is created. An admin must verify it before students can see and order from your shop.</div>
+        <div class="success-detail" id="suShopDetail"></div>
+        <div class="badge-pending" style="margin:0 auto 20px">⏳ Pending verification</div>
+        <button class="btn-main green" onclick="launchApp('shop')">Open shop dashboard <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+      </div>
+
+      <div class="success-card" id="successLogin">
+        <div class="success-icon blue" id="slIcon">👋</div>
+        <div class="success-title" id="slTitle">Signed in!</div>
+        <div class="success-sub" id="slSub">Redirecting you now…</div>
+        <button class="btn-main" id="slBtn" onclick="launchApp('user')">Open app <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></button>
+      </div>
+
+      <!-- ════ FORGOT PASSWORD ════ -->
+      <div class="form-section" id="secForgot">
+        <div class="auth-title" style="font-size:22px">Reset password</div>
+        <div class="auth-sub">We'll send a reset link to your email</div>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="fpEmail" placeholder="your@email.com">
+          <div class="field-err" id="fpEmailErr">Enter a valid email</div>
+        </div>
+        <button class="btn-main" onclick="sendReset()">Send reset link</button>
+        <div class="switch-text"><span class="link" onclick="hideForgot()">← Back to sign in</span></div>
+      </div>
+
+      <div class="switch-text" style="margin-top:28px">Admin tools: <a class="link" href="./NearDoc-admin.html">Open admin panel</a></div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  AUTH DB  (localStorage, same origin as main apps)
+// ══════════════════════════════════════════
+const AUTH = {
+  USERS_KEY:  'neardoc_users',
+  SHOPS_KEY:  'neardoc_shops',
+  SESSION_KEY:'neardoc_session',
+
+  getUsers(){ try{return JSON.parse(localStorage.getItem(this.USERS_KEY)||'[]')}catch{return[]} },
+  getShops(){ try{return JSON.parse(localStorage.getItem(this.SHOPS_KEY)||'[]')}catch{return[]} },
+  saveUsers(d){ localStorage.setItem(this.USERS_KEY, JSON.stringify(d)) },
+  saveShops(d){ localStorage.setItem(this.SHOPS_KEY, JSON.stringify(d)) },
+
+  addUser(u){
+    const users=this.getUsers();
+    users.unshift(u);
+    this.saveUsers(users);
+    return u;
+  },
+  addShop(s){
+    const shops=this.getShops();
+    shops.unshift(s);
+    this.saveShops(shops);
+    return s;
+  },
+  findUserByEmail(email){
+    return this.getUsers().find(u=>u.email.toLowerCase()===email.toLowerCase());
+  },
+  findShopByEmail(email){
+    return this.getShops().find(s=>s.email.toLowerCase()===email.toLowerCase());
+  },
+  setSession(data){
+    localStorage.setItem(this.SESSION_KEY, JSON.stringify({...data, ts:Date.now()}));
+  },
+  getSession(){
+    try{return JSON.parse(localStorage.getItem(this.SESSION_KEY)||'null')}catch{return null}
+  },
+  clearSession(){
+    localStorage.removeItem(this.SESSION_KEY);
+  }
+};
+
+// Simple hash (for demo - in production use bcrypt server-side)
+function hashPwd(pwd){
+  let h=0;
+  for(let i=0;i<pwd.length;i++){h=((h<<5)-h)+pwd.charCodeAt(i);h|=0}
+  return 'h'+Math.abs(h).toString(16)+pwd.length;
+}
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentRole = 'user';   // 'user' | 'shop'
+let currentMode = 'login';  // 'login' | 'register'
+let shopRegStep = 0;
+let shopFormData = {};
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+// ══════════════════════════════════════════
+//  LEFT PANEL CONTENT
+// ══════════════════════════════════════════
+const leftContent = {
+  user: {
+    heading: 'Print smarter,<br><em>skip the queue.</em>',
+    sub: 'Upload documents from anywhere, pick a shop, and walk in to a ready printout. Zero waiting.',
+    feats: [
+      {icon:'📄', text:'<strong>Upload any document</strong> — PDF, DOCX, images'},
+      {icon:'🗺️', text:'<strong>Find nearby shops</strong> on campus instantly'},
+      {icon:'💰', text:'<strong>B&W from ₹2/page</strong>, color from ₹8/page'},
+      {icon:'🔔', text:'<strong>Real-time alerts</strong> when your print is ready'},
+    ]
+  },
+  shop: {
+    heading: 'Grow your shop<br>with <em>digital orders.</em>',
+    sub: 'Receive organized print orders from students, reduce walk-in chaos, and increase your daily revenue.',
+    feats: [
+      {icon:'📥', text:'<strong>Digital order queue</strong> — no more paper slips'},
+      {icon:'📊', text:'<strong>Revenue dashboard</strong> with live stats'},
+      {icon:'🔒', text:'<strong>OTP-verified pickup</strong> — zero handover errors'},
+      {icon:'⚡', text:'<strong>Auto-notifications</strong> to students when ready'},
+    ]
+  }
+};
+
+function renderLeft(){
+  const c = leftContent[currentRole];
+  document.getElementById('leftContent').innerHTML = `
+    <h2 class="left-heading" style="margin-bottom:14px">${c.heading}</h2>
+    <p class="left-sub">${c.sub}</p>
+    <div class="feat-list">
+      ${c.feats.map(f=>`<div class="feat">
+        <div class="feat-dot">${f.icon}</div>
+        <div class="feat-text">${f.text}</div>
+      </div>`).join('')}
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════
+//  ROLE & MODE SWITCHING
+// ══════════════════════════════════════════
+function setRole(role){
+  currentRole = role;
+  document.getElementById('roleUser').classList.toggle('active', role==='user');
+  document.getElementById('roleShop').classList.toggle('active', role==='shop');
+  renderLeft();
+  setMode(currentMode);
+}
+
+function setMode(mode){
+  currentMode = mode;
+  // Toggle buttons
+  document.getElementById('btnLogin').classList.toggle('active', mode==='login');
+  document.getElementById('btnRegister').classList.toggle('active', mode==='register');
+  // Hide all sections
+  ['secUserLogin','secUserRegister','secShopLogin','secShopRegister','secForgot'].forEach(id=>{
+    document.getElementById(id).classList.remove('active');
+  });
+  ['successUser','successShop','successLogin'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+  document.getElementById('authToggle').style.display='flex';
+  document.getElementById('roleSelector').style.display='block';
+  // Show correct section
+  if(mode==='login'){
+    document.getElementById(currentRole==='user'?'secUserLogin':'secShopLogin').classList.add('active');
+  } else {
+    if(currentRole==='user'){
+      document.getElementById('secUserRegister').classList.add('active');
+    } else {
+      document.getElementById('secShopRegister').classList.add('active');
+      shopRegStep=0;
+      renderShopSteps();
+      renderHoursGrid();
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+//  OPENING HOURS GRID
+// ══════════════════════════════════════════
+function renderHoursGrid(){
+  const defaults={
+    Monday:{open:true,from:'08:00',to:'21:00'},
+    Tuesday:{open:true,from:'08:00',to:'21:00'},
+    Wednesday:{open:true,from:'08:00',to:'21:00'},
+    Thursday:{open:true,from:'08:00',to:'21:00'},
+    Friday:{open:true,from:'08:00',to:'21:00'},
+    Saturday:{open:true,from:'09:00',to:'18:00'},
+    Sunday:{open:false,from:'10:00',to:'14:00'},
+  };
+  document.getElementById('hoursGrid').innerHTML = DAYS.map(day=>{
+    const d=defaults[day];
+    return `<div class="hours-row" id="hr_${day}">
+      <input type="checkbox" id="hc_${day}" ${d.open?'checked':''} onchange="toggleDayHours('${day}',this.checked)" style="width:16px;height:16px;accent-color:var(--blue)">
+      <label for="hc_${day}" class="hours-day" style="cursor:pointer">${day.slice(0,3)}</label>
+      <input class="hours-time" type="time" id="hf_${day}" value="${d.from}" ${d.open?'':'disabled'}>
+      <input class="hours-time" type="time" id="ht_${day}" value="${d.to}" ${d.open?'':'disabled'}>
+    </div>`;
+  }).join('');
+}
+
+function toggleDayHours(day, enabled){
+  document.getElementById('hf_'+day).disabled = !enabled;
+  document.getElementById('ht_'+day).disabled = !enabled;
+}
+
+function getHoursData(){
+  const hours={};
+  DAYS.forEach(day=>{
+    hours[day]={
+      open: document.getElementById('hc_'+day)?.checked||false,
+      from: document.getElementById('hf_'+day)?.value||'',
+      to:   document.getElementById('ht_'+day)?.value||''
+    };
+  });
+  return hours;
+}
+
+// ══════════════════════════════════════════
+//  SERVICES TOGGLE
+// ══════════════════════════════════════════
+function toggleSvc(el){ el.classList.toggle('active'); }
+function getSelectedSvcs(){
+  return Array.from(document.querySelectorAll('.svc-chip.active')).map(el=>el.dataset.svc);
+}
+
+// ══════════════════════════════════════════
+//  SHOP REGISTER STEPS
+// ══════════════════════════════════════════
+function renderShopSteps(){
+  for(let i=0;i<4;i++){
+    const num=document.getElementById('snum'+i);
+    const lbl=document.getElementById('slbl'+i);
+    if(i<shopRegStep){ num.className='step-num done'; num.textContent='✓'; }
+    else if(i===shopRegStep){ num.className='step-num active'; num.textContent=i+1; lbl.className='step-label active'; }
+    else { num.className='step-num'; num.textContent=i+1; lbl.className='step-label'; }
+    if(i<3){
+      document.getElementById('sline'+i).className='step-line'+(i<shopRegStep?' done':'');
+    }
+  }
+  for(let i=0;i<4;i++){
+    const step=document.getElementById('shopStep'+i);
+    if(step) step.style.display=i===shopRegStep?'block':'none';
+  }
+}
+
+function shopNext(step){
+  if(step===0){
+    const fname=document.getElementById('srFname').value.trim();
+    const lname=document.getElementById('srLname').value.trim();
+    const email=document.getElementById('srEmail').value.trim();
+    const phone=document.getElementById('srPhone').value.trim();
+    const pwd=document.getElementById('srPwd').value;
+    const pwd2=document.getElementById('srPwd2').value;
+    let ok=true;
+    if(!fname){showErr('srFnameErr');ok=false;}else hideErr('srFnameErr');
+    if(!lname){showErr('srLnameErr');ok=false;}else hideErr('srLnameErr');
+    if(!isEmail(email)){showErr('srEmailErr');ok=false;}else hideErr('srEmailErr');
+    if(!isPhone(phone)){showErr('srPhoneErr');ok=false;}else hideErr('srPhoneErr');
+    if(pwd.length<6){showErr('srPwdErr');ok=false;}else hideErr('srPwdErr');
+    if(pwd!==pwd2){showErr('srPwd2Err');ok=false;}else hideErr('srPwd2Err');
+    if(!ok) return;
+    if(AUTH.findShopByEmail(email)){ showToast('⚠️ An account with this email already exists'); markErr('srEmail'); return; }
+    shopFormData.fname=fname; shopFormData.lname=lname;
+    shopFormData.email=email; shopFormData.phone=phone; shopFormData.pwd=pwd;
+  }
+  if(step===1){
+    const name=document.getElementById('srShopName').value.trim();
+    const addr=document.getElementById('srAddress').value.trim();
+    const campus=document.getElementById('srCampus').value.trim();
+    const pin=document.getElementById('srPin').value.trim();
+    let ok=true;
+    if(!name){showErr('srShopNameErr');ok=false;}else hideErr('srShopNameErr');
+    if(!addr){showErr('srAddressErr');ok=false;}else hideErr('srAddressErr');
+    if(!campus){showErr('srCampusErr');ok=false;}else hideErr('srCampusErr');
+    if(!/^\d{6}$/.test(pin)){showErr('srPinErr');ok=false;}else hideErr('srPinErr');
+    if(!ok) return;
+    shopFormData.shopName=name;
+    shopFormData.tagline=document.getElementById('srTagline').value.trim();
+    shopFormData.address=addr; shopFormData.campus=campus; shopFormData.pin=pin;
+    shopFormData.mapsLink=document.getElementById('srMaps').value.trim();
+    shopFormData.printers=document.getElementById('srPrinters').value;
+    shopFormData.logo=document.getElementById('shopAvatarPreview').dataset.img||null;
+  }
+  if(step===2){
+    const svcs=getSelectedSvcs();
+    if(!svcs.length){showErr('svcErr');return;}else hideErr('svcErr');
+    shopFormData.services=svcs;
+    shopFormData.priceBw=document.getElementById('srPriceBw').value||'2';
+    shopFormData.priceClr=document.getElementById('srPriceClr').value||'8';
+    shopFormData.eta=document.getElementById('srEta').value;
+    shopFormData.capacity=document.getElementById('srCapacity').value;
+    shopFormData.about=document.getElementById('srAbout').value.trim();
+  }
+  shopRegStep++;
+  renderShopSteps();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function shopBack(step){
+  shopRegStep=step-1;
+  renderShopSteps();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════
+//  SHOP LOGO PREVIEW
+// ══════════════════════════════════════════
+function previewLogo(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById('shopAvatarPreview');
+    prev.innerHTML=`<img src="${e.target.result}" alt="logo">`;
+    prev.dataset.img=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════════
+//  USER REGISTER
+// ══════════════════════════════════════════
+function registerUser(){
+  const fname=document.getElementById('urFname').value.trim();
+  const lname=document.getElementById('urLname').value.trim();
+  const email=document.getElementById('urEmail').value.trim();
+  const phone=document.getElementById('urPhone').value.trim();
+  const college=document.getElementById('urCollege').value.trim();
+  const pwd=document.getElementById('urPwd').value;
+  const pwd2=document.getElementById('urPwd2').value;
+  const terms=document.getElementById('urTerms').checked;
+  let ok=true;
+  if(!fname){showErr('urFnameErr');ok=false;}else hideErr('urFnameErr');
+  if(!lname){showErr('urLnameErr');ok=false;}else hideErr('urLnameErr');
+  if(!isEmail(email)){showErr('urEmailErr');ok=false;}else hideErr('urEmailErr');
+  if(!isPhone(phone)){showErr('urPhoneErr');ok=false;}else hideErr('urPhoneErr');
+  if(!college){showErr('urCollegeErr');ok=false;}else hideErr('urCollegeErr');
+  if(pwd.length<6){showErr('urPwdErr');ok=false;}else hideErr('urPwdErr');
+  if(pwd!==pwd2){showErr('urPwd2Err');ok=false;}else hideErr('urPwd2Err');
+  if(!terms){showErr('urTermsErr');ok=false;}else hideErr('urTermsErr');
+  if(!ok) return;
+  if(AUTH.findUserByEmail(email)){ showToast('⚠️ Account with this email already exists'); markErr('urEmail'); return; }
+
+  const user = AUTH.addUser({
+    id:'USR'+Date.now(),
+    fname, lname, email, phone, college,
+    pwd: hashPwd(pwd),
+    role:'user', createdAt:Date.now()
+  });
+  AUTH.setSession({role:'user', id:user.id, name:fname+' '+lname, email});
+
+  // Show success
+  hideAllForms();
+  document.getElementById('suUserDetail').innerHTML=`
+    <div class="success-detail-row"><span>Name</span><span>${fname} ${lname}</span></div>
+    <div class="success-detail-row"><span>Email</span><span>${email}</span></div>
+    <div class="success-detail-row"><span>College</span><span>${college}</span></div>
+  `;
+  document.getElementById('suUserSub').textContent=`Hi ${fname}! Your account is ready. Start printing documents at campus shops near you.`;
+  document.getElementById('successUser').style.display='block';
+  showToast('🎉 Account created successfully!');
+}
+
+// ══════════════════════════════════════════
+//  SHOP REGISTER
+// ══════════════════════════════════════════
+function registerShop(){
+  const terms=document.getElementById('srTerms').checked;
+  if(!terms){showErr('srTermsErr');return;}else hideErr('srTermsErr');
+
+  shopFormData.hours=getHoursData();
+  shopFormData.holiday=document.getElementById('srHoliday').value.trim();
+
+  // Assign a shop ID (numeric for compatibility with existing app)
+  const existingShops=AUTH.getShops();
+  const shopId = existingShops.length + 4; // 1,2,3 are reserved for demo shops
+
+  const shop = AUTH.addShop({
+    id: shopId,
+    authId:'SHP'+Date.now(),
+    ownerName: shopFormData.fname+' '+shopFormData.lname,
+    email: shopFormData.email,
+    phone: shopFormData.phone,
+    pwd: hashPwd(shopFormData.pwd),
+    name: shopFormData.shopName,
+    tagline: shopFormData.tagline||'',
+    address: shopFormData.address,
+    campus: shopFormData.campus,
+    pin: shopFormData.pin,
+    mapsLink: shopFormData.mapsLink||'',
+    logo: shopFormData.logo||null,
+    printers: shopFormData.printers,
+    services: shopFormData.services||[],
+    priceBw: shopFormData.priceBw||'2',
+    priceClr: shopFormData.priceClr||'8',
+    eta: shopFormData.eta||'8-10 min',
+    capacity: shopFormData.capacity||'10',
+    about: shopFormData.about||'',
+    hours: shopFormData.hours||{},
+    holiday: shopFormData.holiday||'',
+    status:'pending', // pending | verified | suspended
+    rating: null, reviews:0,
+    createdAt: Date.now()
+  });
+
+  AUTH.setSession({role:'shop', id:shop.authId, shopId:shopId, name:shop.name, email:shop.email});
+
+  // Show success
+  hideAllForms();
+  const hrs=Object.entries(shop.hours).filter(([,v])=>v.open).map(([d,v])=>d.slice(0,3)+' '+v.from+'–'+v.to);
+  document.getElementById('suShopDetail').innerHTML=`
+    <div class="success-detail-row"><span>Shop name</span><span>${shop.name}</span></div>
+    <div class="success-detail-row"><span>Campus</span><span>${shop.campus}</span></div>
+    <div class="success-detail-row"><span>Services</span><span>${shop.services.length} types</span></div>
+    <div class="success-detail-row"><span>B&W price</span><span>₹${shop.priceBw}/page</span></div>
+  `;
+  document.getElementById('successShop').style.display='block';
+  showToast('🎉 Shop registered successfully!');
+}
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+function loginUser(){
+  const email=document.getElementById('ulEmail').value.trim();
+  const pwd=document.getElementById('ulPwd').value;
+  let ok=true;
+  if(!isEmail(email)){showErr('ulEmailErr');ok=false;}else hideErr('ulEmailErr');
+  if(!pwd){showErr('ulPwdErr');ok=false;}else hideErr('ulPwdErr');
+  if(!ok) return;
+
+  const user=AUTH.findUserByEmail(email);
+  if(!user || user.pwd!==hashPwd(pwd)){
+    showToast('❌ Incorrect email or password');
+    markErr('ulEmail'); markErr('ulPwd');
+    return;
+  }
+  AUTH.setSession({role:'user', id:user.id, name:user.fname+' '+user.lname, email:user.email});
+  showLoginSuccess('user', user.fname+' '+user.lname, email);
+}
+
+function loginShop(){
+  const email=document.getElementById('slEmail').value.trim();
+  const pwd=document.getElementById('slPwd').value;
+  let ok=true;
+  if(!isEmail(email)){showErr('slEmailErr');ok=false;}else hideErr('slEmailErr');
+  if(!pwd){showErr('slPwdErr');ok=false;}else hideErr('slPwdErr');
+  if(!ok) return;
+
+  const shop=AUTH.findShopByEmail(email);
+  if(!shop || shop.pwd!==hashPwd(pwd)){
+    showToast('❌ Incorrect email or password');
+    markErr('slEmail'); markErr('slPwd');
+    return;
+  }
+  if(shop.status==='suspended'){
+    showToast('⛔ This shop account is suspended. Contact admin.');
+    return;
+  }
+  AUTH.setSession({role:'shop', id:shop.authId, shopId:shop.id, name:shop.name, email:shop.email});
+  showLoginSuccess('shop', shop.name, email, shop.status);
+}
+
+function showLoginSuccess(role, name, email, status){
+  hideAllForms();
+  const isShop = role==='shop';
+  const el=document.getElementById('successLogin');
+  document.getElementById('slIcon').textContent=isShop?'🖨️':'🎓';
+  document.getElementById('slIcon').className='success-icon '+(isShop?'green':'blue');
+  document.getElementById('slTitle').textContent='Welcome back, '+name.split(' ')[0]+'!';
+  document.getElementById('slSub').textContent=isShop && status==='pending'
+    ? 'Signed in as '+email+'. Your shop is still pending admin verification, but you can manage your dashboard and profile now.'
+    : 'Signed in as '+email+'. Opening your '+(isShop?'dashboard':'app')+'…';
+  document.getElementById('slBtn').textContent=isShop?'Open dashboard →':'Open app →';
+  document.getElementById('slBtn').onclick=()=>launchApp(role);
+  el.style.display='block';
+  showToast('✅ Signed in successfully!');
+  setTimeout(()=>launchApp(role), 2000);
+}
+
+// ══════════════════════════════════════════
+//  LAUNCH
+// ══════════════════════════════════════════
+function launchApp(role){
+  if(role==='shop'){
+    window.location.href='./NearDoc-shop.html';
+  } else {
+    window.location.href='./NearDoc.html';
+  }
+}
+
+// ══════════════════════════════════════════
+//  FORGOT PASSWORD
+// ══════════════════════════════════════════
+function showForgot(){
+  hideAllForms();
+  document.getElementById('authToggle').style.display='none';
+  document.getElementById('roleSelector').style.display='none';
+  document.getElementById('secForgot').classList.add('active');
+}
+function hideForgot(){
+  document.getElementById('authToggle').style.display='flex';
+  document.getElementById('roleSelector').style.display='block';
+  document.getElementById('secForgot').classList.remove('active');
+  setMode(currentMode);
+}
+function sendReset(){
+  const email=document.getElementById('fpEmail').value.trim();
+  if(!isEmail(email)){showErr('fpEmailErr');return;}
+  hideErr('fpEmailErr');
+  showToast('📧 Reset link sent to '+email);
+  setTimeout(hideForgot, 1500);
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function hideAllForms(){
+  ['secUserLogin','secUserRegister','secShopLogin','secShopRegister','secForgot'].forEach(id=>{
+    document.getElementById(id).classList.remove('active');
+  });
+  ['successUser','successShop','successLogin'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+  document.getElementById('authToggle').style.display='none';
+  document.getElementById('roleSelector').style.display='none';
+}
+
+function isEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function isPhone(p){ return /^[\d\s\+\-\(\)]{7,15}$/.test(p); }
+
+function showErr(id){ const e=document.getElementById(id); if(e){e.classList.add('show');} }
+function hideErr(id){ const e=document.getElementById(id); if(e){e.classList.remove('show');} }
+function markErr(id){ const e=document.getElementById(id); if(e){e.classList.add('error');setTimeout(()=>e.classList.remove('error'),3000);} }
+
+function togglePwd(inputId, btn){
+  const inp=document.getElementById(inputId);
+  if(!inp) return;
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+
+function checkPwdStrength(input, wrapperId){
+  const pwd=input.value;
+  const wrap=document.getElementById(wrapperId);
+  if(!wrap) return;
+  if(!pwd){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const bar=document.getElementById(wrapperId.replace('Strength','Bar'));
+  const lbl=document.getElementById(wrapperId.replace('Strength','Label'));
+  let score=0;
+  if(pwd.length>=6) score++;
+  if(pwd.length>=10) score++;
+  if(/[A-Z]/.test(pwd)) score++;
+  if(/[0-9]/.test(pwd)) score++;
+  if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  const levels=[
+    {pct:'20%',color:'#d43a3a',label:'Very weak'},
+    {pct:'40%',color:'#c47800',label:'Weak'},
+    {pct:'60%',color:'#c47800',label:'Fair'},
+    {pct:'80%',color:'#0a8a5c',label:'Strong'},
+    {pct:'100%',color:'#0a8a5c',label:'Very strong'},
+  ];
+  const l=levels[score-1]||levels[0];
+  if(bar){bar.style.width=l.pct;bar.style.background=l.color;}
+  if(lbl){lbl.textContent=l.label;lbl.style.color=l.color;}
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+renderLeft();
+renderShopSteps();
+renderHoursGrid();
+
+// Pre-fill from session if already logged in
+const sess=AUTH.getSession();
+if(sess){
+  showToast('👋 Already signed in as '+sess.name);
+}
+
+// Add Enter key support for login forms
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return;
+  const active=document.querySelector('.form-section.active');
+  if(!active) return;
+  if(active.id==='secUserLogin') loginUser();
+  else if(active.id==='secShopLogin') loginShop();
+  else if(active.id==='secForgot') sendReset();
+});
+</script>
+</body>
+</html>

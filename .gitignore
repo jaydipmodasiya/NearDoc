@@ -1,0 +1,64 @@
+# ============================================================
+# NearDoc — .gitignore
+# Static HTML/CSS/JS project — no build tools or server
+# ============================================================
+
+# ── OS FILES ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# ── IDE / EDITOR ────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+
+# ── PRIVATE / ACADEMIC DOCUMENTS ────────────────────────────
+# Presentations, reports, and academic submissions
+presentation/
+*.pptx
+*.ppt
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+
+# ── PERSONAL NOTES / EXPORTS ────────────────────────────────
+*.txt.bak
+notes/
+drafts/
+exports/
+
+# ── SECRETS / ENVIRONMENT ───────────────────────────────────
+# (This project has no backend, but keeping these as a safety net)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials/
+
+# ── TEMPORARY / GENERATED ───────────────────────────────────
+*.log
+*.tmp
+*.cache
+*.bak
+*.swp
+*.orig
+~*
+
+# ── SCREENSHOTS CONTAINING PERSONAL INFO ────────────────────
+# Add individual filenames if needed
+# e.g. report-screenshot.png
+
+# ── NODE (if ever added) ────────────────────────────────────
+node_modules/
+dist/
+build/
+.npm/
